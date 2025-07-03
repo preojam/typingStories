@@ -2,6 +2,7 @@ package com.lbm294.typingstories.controller;
 
 import com.lbm294.typingstories.model.TypingResult;
 import com.lbm294.typingstories.repository.TypingResultRepository;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,13 +35,16 @@ public class TypingResultController {
     }
 
     @PostMapping
-    public ResponseEntity<TypingResult> create(@RequestBody TypingResult result) {
+    public ResponseEntity<TypingResult> create(@RequestBody @Valid TypingResult result) {
+        if (result.getStory() == null || result.getStory().getId() == null) {
+            return ResponseEntity.badRequest().build();
+        }
         TypingResult saved = typingResultRepo.save(result);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<TypingResult> update(@PathVariable Long id, @RequestBody TypingResult result) {
+    public ResponseEntity<TypingResult> update(@PathVariable Long id, @RequestBody @Valid TypingResult result) {
         if (!typingResultRepo.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
@@ -56,5 +60,4 @@ public class TypingResultController {
         typingResultRepo.deleteById(id);
         return ResponseEntity.noContent().build();
     }
-
 }

@@ -1,5 +1,6 @@
 package com.lbm294.typingstories.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 
@@ -24,6 +25,7 @@ public class Story {
     private String content;
 
     @OneToMany(mappedBy = "story", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<Score> scores = new ArrayList<>();
 
     @OneToMany(mappedBy = "story", cascade = CascadeType.ALL)

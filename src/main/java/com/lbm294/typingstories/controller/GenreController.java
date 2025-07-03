@@ -2,6 +2,7 @@ package com.lbm294.typingstories.controller;
 
 import com.lbm294.typingstories.model.Genre;
 import com.lbm294.typingstories.repository.GenreRepository;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,20 +28,20 @@ public class GenreController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Genre> getById(@RequestParam Long id) {
+    public ResponseEntity<Genre> getById(@PathVariable Long id) {
         return genreRepo.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<Genre> create(@RequestBody Genre genre) {
+    public ResponseEntity<Genre> create(@RequestBody @Valid Genre genre) {
         Genre saved = genreRepo.save(genre);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Genre> update(@PathVariable Long id, @RequestBody Genre genre) {
+    public ResponseEntity<Genre> update(@PathVariable Long id, @RequestBody @Valid Genre genre) {
         if (!genreRepo.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
@@ -48,7 +49,7 @@ public class GenreController {
         return ResponseEntity.ok(genreRepo.save(genre));
     }
 
-    @DeleteMapping
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         if (!genreRepo.existsById(id)) {
             return ResponseEntity.notFound().build();
@@ -56,5 +57,4 @@ public class GenreController {
         genreRepo.deleteById(id);
         return ResponseEntity.noContent().build();
     }
-
 }

@@ -1,5 +1,7 @@
 package com.lbm294.typingstories.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
@@ -13,13 +15,14 @@ public class Score {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "story_id")
+    @JoinColumn(name = "storyId")
+    @JsonBackReference
     private Story story;
 
     @NotBlank
     private String component;
 
-    @DecimalMin("0,0")
+    @DecimalMin("0.0")
     @DecimalMax("10.0")
     private Double value;
 

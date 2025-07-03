@@ -1,5 +1,7 @@
 package com.lbm294.typingstories.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
@@ -16,6 +18,7 @@ public class TypingResult {
 
     @ManyToOne
     @JoinColumn(name = "storyId")
+    @JsonBackReference
     private Story story;
 
     @Size(max = 50)
