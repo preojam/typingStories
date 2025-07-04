@@ -1,35 +1,36 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import './App.css';
 
-function App() {
-  const [count, setCount] = useState(0)
+import Home          from './pages/Home';
+import Discover      from './pages/Discover';
+import Stories       from './pages/Stories';
+import Reader        from './pages/Reader';
+import CreateStory   from './pages/CreateStory';
+import Typing        from './pages/Typing';
+import Practice      from './pages/Practice.jsx';
+import Test          from './pages/Test';
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+export default function App() {
+    return (
+        <BrowserRouter>
+            <Routes>
+                /* Top lvl */
+                <Route path="/" element={<Home />} />
+                <Route path="/discover" element={<Discover />} />
+                <Route path="/stories" element={<Stories />} />
+
+                /* Dropdown Stories */
+                <Route path="/stories/:id" element={<Reader />} />
+                <Route path="/stories/:id/create" element={<CreateStory />} />
+                <Route path="/stories/:id/typing" element={<Typing />} />
+                <Route path="/stories/:id/practice" element={<Practice />} />
+                <Route path="/stories/:id/test" element={<Test />} />
+
+                /* Fallback auf home */
+                <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+        </BrowserRouter>
+    )
 }
-
-export default App
