@@ -1,36 +1,32 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import React from 'react';
-import ReactDOM from 'react-dom';
-import './App.css';
-
-import Home          from './pages/Home';
-import Discover      from './pages/Discover';
-import Stories       from './pages/Stories';
-import Reader        from './pages/Reader';
-import CreateStory   from './pages/CreateStory';
-import Typing        from './pages/Typing';
-import Practice      from './pages/Practice.jsx';
-import Test          from './pages/Test';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Navbar from './components/Navbar';      // ← Hier die Navbar importieren
+import Home from './pages/Home';
+import Discover from './pages/Discover';
+import MyStories from './pages/MyStories';
+import CreateStory from './pages/CreateStory';
+import Practice from './pages/Practice';
+import SearchResults from './pages/SearchResults';
+import NotFound from './pages/NotFound';
 
 export default function App() {
     return (
         <BrowserRouter>
-            <Routes>
-                /* Top lvl */
-                <Route path="/" element={<Home />} />
-                <Route path="/discover" element={<Discover />} />
-                <Route path="/stories" element={<Stories />} />
-
-                /* Dropdown Stories */
-                <Route path="/stories/:id" element={<Reader />} />
-                <Route path="/stories/:id/create" element={<CreateStory />} />
-                <Route path="/stories/:id/typing" element={<Typing />} />
-                <Route path="/stories/:id/practice" element={<Practice />} />
-                <Route path="/stories/:id/test" element={<Test />} />
-
-                /* Fallback auf home */
-                <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
+            <div className="app">
+                <Navbar />
+                <main className="app__content">
+                    <Routes>
+                        <Route path="/" element={<Home />} />
+                        <Route path="/discover" element={<Discover />} />
+                        <Route path="/my-stories" element={<MyStories />} />
+                        <Route path="/writing/new" element={<CreateStory />} />
+                        <Route path="/typing/:storyId" element={<Practice />} />
+                        <Route path="/search" element={<SearchResults />} />
+                        <Route path="*" element={<NotFound />} />
+                    </Routes>
+                </main>
+            </div>
         </BrowserRouter>
-    )
+
+    );
 }

@@ -1,32 +1,193 @@
-/* NavBar */
-.navbar ul {
-  list-style: none;
-  display: flex;
-  gap: 1.5rem;
-  padding: 0;
-  margin: 0;
+/* 1) Grundgerüst */
+.app {
+    margin-top: 60px;           /* so hoch wie die Navbar */
+    padding: 1rem;              /* etwas Innenabstand */
+
+    max-width: 1000px;          /* oder 1200px, wie es dir gefällt */
+    margin-left: auto;          /* horizontal zentrieren */
+    margin-right: auto;
+}
+body {
+    display: block;
+    justify-content: center;
 }
 
-.navbar .dropdown {
-  position: relative;
+/* 2) Navbar am Viewport-Top festkleben */
+.app > nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    /* Höhe z. B. 60px: */
+    height: 60px;
+    z-index: 1000;
 }
 
-.navbar .dropdown-menu {
-  display: none;
-  position: absolute;
-  top: 100%;
-  left: 0;
-  background: #222;
-  padding: 0.5rem;
-  list-style: none;
-  margin: 0;
+
+/* 3) Content-Bereich */
+.app__content {
+    display: flex;
+    flex-direction: column;     /* Elemente untereinander */
+    align-items: center;        /* horizontal zentrieren */
+    justify-content: flex-start;/* vertikal oben beginnen */
+    min-height: calc(100vh - 60px); /* füllt den Rest unter der Navbar */
+    margin: 0 auto;             /* horizontal zentrieren */
+    padding: 1rem;
+    box-sizing: border-box;
 }
 
-.navbar .dropdown:hover .dropdown-menu {
-  display: block;
+/*---------------------------------------------------------------------------------------------------*/
+/* navbar 1) Grundlayout */
+.navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #333;
+    padding: 0.5rem 1.5rem;
+    color: white;
+    font-family: sans-serif;
+    height: 60px;
 }
 
-.navbar a {
-  color: #fff;
-  text-decoration: none;
+/* 2) Logo */
+.navbar__logo a {
+    color: white;
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+/* 3) Menüliste */
+.navbar__menu {
+    list-style: none;
+    margin-right: 3rem;
+    padding: 0;
+    display: flex;
+    align-items: center;
+}
+
+/* 4) Menü-Item */
+.navbar__item {
+    margin-left: 1rem;
+    position: relative; /* für das Dropdown-Positionieren */
+}
+
+/* 5) Links und Buttons */
+.navbar__menu a,
+.navbar__dropbtn {
+    color: white;
+    text-decoration: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    font-size: 1rem;
+}
+
+/* Hover-Effekt */
+.navbar__menu a:hover,
+.navbar__dropbtn:hover {
+    background-color: #444;
+    border-radius: 4px;
+}
+
+/* 6) Suchfeld */
+.navbar__search-form {
+    display: inline-block;
+    margin-left: 0.5rem;
+}
+
+.navbar__search-input {
+    padding: 0.3rem 0.5rem;
+    border: 1px solid #555;
+    border-radius: 4px;
+    background-color: #444;
+    color: white;
+    width: 140px;
+}
+
+.navbar__search-input:focus {
+    outline: none;
+    border-color: #888;
+}
+
+/* 7) Dropdown-Inhalt (versteckt) */
+.navbar__dropdown-content {
+    display: none;
+    position: absolute;
+    top: 100%; /* direkt unter dem Button */
+    right: 0;
+    background-color: #444;
+    min-width: 160px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    border-radius: 4px;
+    padding: 0.5rem 0;
+    z-index: 1000;
+    list-style: none;
+}
+
+/* 8) Dropdown-Links */
+.navbar__dropdown-content li {
+    margin: 0;
+}
+
+.navbar__dropdown-content a {
+    display: block;
+    padding: 0.5rem 1rem;
+    color: white;
+    text-decoration: none;
+}
+
+.navbar__dropdown-content a:hover {
+    background-color: #555;
+}
+
+/* 9) Dropdown beim Hover einblenden */
+.navbar__dropdown:hover .navbar__dropdown-content {
+    display: block;
+}
+/*-----------------------------------------------------------------------------------------------------------*/
+
+.typing-page {
+    background: #111;
+    color: #eee;
+    padding: 2rem;
+    height: 100vh;
+    box-sizing: border-box;
+}
+.typing-header {
+    display: flex;
+    justify-content: flex-end;
+    gap: 2rem;
+    font-family: sans-serif;
+    margin-bottom: 2rem;
+}
+.typing-text {
+    font-family: "Courier New", monospace;
+    font-size: 1.25rem;
+    line-height: 1.5;
+    outline: none;
+    user-select: none;
+    white-space: pre-wrap;
+}
+/* korrekt getippt (grün hinterlegt) */
+.typing-text .correct {
+    background-color: #27ae60;
+    color: #111;
+}
+/* falsch getippt: typed Char in rot */
+.typing-text .incorrect {
+    background-color: #c0392b;
+    color: #fff;
+}
+/* aktuelles Zeichen */
+.typing-text .current {
+    background-color: #27ae60;
+    color: #111;
+    text-decoration: underline;
+}
+/* noch nicht getippt */
+.typing-text .pending {
+    color: #eee;
 }
