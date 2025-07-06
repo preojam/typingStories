@@ -4,12 +4,18 @@ import com.lbm294.typingstories.model.Story;
 import com.lbm294.typingstories.repository.GenreRepository;
 import com.lbm294.typingstories.repository.StoryRepository;
 import jakarta.validation.Valid;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/stories")
@@ -18,6 +24,13 @@ public class StoryController {
 
     private final StoryRepository storyRepo;
     private final GenreRepository genreRepo;
+
+    /**
+     * Verzeichnis, in dem Uploads (Cover-Bilder) gespeichert werden.
+     * Wird relativ zum Arbeitsverzeichnis deiner Spring-Boot-App angelegt:
+     *  LB-typingstories/uploads/
+     */
+    private final Path uploadDir = Path.of("uploads");
 
     @Autowired
     public StoryController(StoryRepository storyRepo, GenreRepository genreRepo) {
@@ -37,32 +50,27 @@ public class StoryController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+
     @GetMapping("/last")
     public ResponseEntity<Story> getLastStory() {
-        Story last = storyRepo.findTopByOrderByIdDesc();
-        if (last != null) {
-            return ResponseEntity.ok(last);
-        } else {
-            return ResponseEntity.noContent().build();
-        }
+        return storyRepo.findTopByOrderByIdDesc()
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.noContent().build());
     }
+
 
     @PostMapping
     public ResponseEntity<Story> create(@RequestBody @Valid Story story) {
+        // Genre-Must-Haves prüfen
         if (story.getGenre() == null || story.getGenre().getId() == null) {
-            // Genre fehlt komplett
             return ResponseEntity.badRequest().body(null);
         }
-
-        boolean genreExists = genreRepo.existsById(story.getGenre().getId());
-        if (!genreExists) {
+        if (!genreRepo.existsById(story.getGenre().getId())) {
             return ResponseEntity.badRequest().body(null);
         }
-
         Story saved = storyRepo.save(story);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
-
 
     @PutMapping("/{id}")
     public ResponseEntity<Story> update(@PathVariable Long id, @RequestBody @Valid Story story) {
@@ -73,7 +81,8 @@ public class StoryController {
             return ResponseEntity.badRequest().build();
         }
         story.setId(id);
-        return ResponseEntity.ok(storyRepo.save(story));
+        Story updated = storyRepo.save(story);
+        return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/{id}")
@@ -85,22 +94,39 @@ public class StoryController {
         return ResponseEntity.noContent().build();
     }
 
+    /**
+     * Upload eines Cover-Bildes für eine bestehende Story.
+     * URL: POST /api/stories/{id}/cover
+     * RequestParam "file" muss ein MultipartFile sein.
+     */
     @PostMapping("/{id}/cover")
     public ResponseEntity<Void> uploadCover(
             @PathVariable Long id,
             @RequestParam("file") MultipartFile file
     ) throws IOException {
+        // Story laden (wirft 404, wenn nicht vorhanden)
         Story story = storyRepo.findById(id).orElseThrow();
-        // Dateiendung beibehalten
+
+        // Dateiendung aus dem Original-Dateinamen extrahieren
         String ext = Objects.requireNonNull(
                 FilenameUtils.getExtension(file.getOriginalFilename())
         );
-        // Ziel-Datei: {uploadDir}/{id}.{ext}
+
+        // Upload-Verzeichnis anlegen, falls noch nicht vorhanden
         Files.createDirectories(uploadDir);
+
+        // Zieldatei: uploads/{id}.{ext}
         Path dest = uploadDir.resolve(id + "." + ext);
+
+        // Datei auf der Festplatte speichern
         file.transferTo(dest.toFile());
-        // URL für Client: /{dateiname}
+
+        // URL, unter der der Client das Bild später anfordern kann
+        // (z.B. http://localhost:8080/{id}.png – du brauchst evtl. eine
+        // ResourceHandler-Config, um "uploads/" statisch auszuliefern)
         story.setCoverUrl("/" + dest.getFileName().toString());
+
+        // Story mit Cover-URL aktualisieren
         storyRepo.save(story);
         return ResponseEntity.ok().build();
     }
