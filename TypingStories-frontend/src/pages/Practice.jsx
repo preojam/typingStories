@@ -1,88 +1,100 @@
-
+// src/pages/Practice.jsx
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import ChapterList from '../components/ChapterList';
-import TextDisplay from '../components/TextDisplay';
-import ToggleSwitch from '../components/ToggleSwitch';
-import { fetchStoryById } from '../api/storyService';
-import TypingPage from '../components/TypingPage';
+import { useParams }          from 'react-router-dom';
+import ToggleSwitch           from '../components/ToggleSwitch';
+import TextDisplay            from '../components/TextDisplay';
+import TypingPage             from '../components/TypingPage';
+import { fetchStoryById }     from '../api/storyService';
 
 export default function Practice() {
     const { storyId } = useParams();
-    const [currentStory, setCurrentStory] = useState(null);
-    const [selectedChapterNumber, setSelectedChapterNumber] = useState(null);
-    const [displayMode, setDisplayMode] = useState('read'); // 'read' oder 'type'
+    const [story, setStory] = useState(null);
+    const [mode, setMode]   = useState('read');    // 'read' oder 'type'
+    const [chapterIdx, setChapterIdx] = useState(0);
 
-    // Story laden
+    // 1) Story laden
     useEffect(() => {
         fetchStoryById(storyId)
-            .then(response => {
-                setCurrentStory(response.data);
-                // direkt erstes Kapitel auswählen, falls vorhanden
-                if (response.data.chapters && response.data.chapters.length > 0) {
-                    setSelectedChapterNumber(response.data.chapters[0].number);
-                }
+            .then(data => {
+                setStory(data);       // <-- hier nicht data.data!
+                setChapterIdx(0);     // erstes „Kapitel“
             })
-            .catch(error => console.error('Error fetching story by ID:', error));
+            .catch(err => console.error(err));
     }, [storyId]);
 
-    if (!currentStory) {
-        return <p>Loading…</p>;
-    }
+    if (!story) return <p>Loading…</p>;
 
-    // Aktuelles Kapitel-Objekt ermitteln
-    const currentChapter = currentStory.chapters.find(
-        chapterObject => chapterObject.number === selectedChapterNumber
-    );
+    // 2) Splitting nach „## Kapitel“-Marker im Text
+    const raw = story.content || '';
+    const parts = raw
+        .split(/^##\s+/m)
+        .filter(p => p.trim().length);
+
+    // 3) Kapitel-Objekte bauen
+    const chapters = parts.map((p, i) => {
+        const [titleLine, ...lines] = p.split('\n');
+        return {
+            id:      i + 1,
+            title:   titleLine.trim(),
+            text:    lines.join('\n').trim()
+        };
+    });
+
+    // 4) aktuellen Index absichern
+    const current = chapters[chapterIdx] || chapters[0];
 
     return (
         <div className="flex h-full">
-            {/* linke Sidebar: Kapitel-Liste */}
+            {/* linke Sidebar */}
             <aside className="w-1/4 p-4 border-r">
-                <h2 className="font-bold mb-4">{currentStory.title}</h2>
-                <ChapterList
-                    chapters={currentStory.chapters}
-                    selectedChapterNumber={selectedChapterNumber}
-                    onSelectChapter={number => setSelectedChapterNumber(number)}
-                />
+                <h2 className="font-bold mb-4">{story.title}</h2>
+                <ul>
+                    {chapters.map(ch => (
+                        <li
+                            key={ch.id}
+                            className={`cursor-pointer py-1 ${chapterIdx === ch.id-1 ? 'font-bold' : ''}`}
+                            onClick={() => setChapterIdx(ch.id - 1)}
+                        >
+                            {ch.title || `Chapter ${ch.id}`}
+                        </li>
+                    ))}
+                </ul>
             </aside>
 
-            {/* Hauptbereich: Read/Type */}
+            {/* Hauptbereich */}
             <main className="flex-1 p-6">
                 <div className="flex justify-end mb-4">
                     <ToggleSwitch
-                        selectedValue={displayMode}
-                        onChange={newMode => setDisplayMode(newMode)}
+                        selectedValue={mode}
                         options={[
                             { id: 'read', label: 'Read' },
                             { id: 'type', label: 'Type' }
                         ]}
+                        onChange={setMode}
                     />
                 </div>
 
-                {displayMode === 'read' ? (
+                {mode === 'read' ? (
                     <TextDisplay
-                        chapterText={currentChapter.text}
-                        chapterNumber={currentChapter.number}
-                        pageNumber={currentChapter.page}
+                        chapterText={current.text}
+                        chapterNumber={current.id}
+                        pageNumber={1}
                     />
                 ) : (
-                    // Hier bindest du deine TypingPage-Komponente ein
                     <TypingPage
-                        text={currentChapter.text}
-                        chapterNumber={currentChapter.number}
-                        pageNumber={currentChapter.page}
+                        text={current.text}
+                        chapter={current.id}
+                        page={1}
                     />
                 )}
             </main>
 
-            {/* rechte Sidebar: statische Platzhalter für Stats/Rating */}
+            {/* rechte Sidebar */}
             <aside className="w-1/4 p-4 border-l">
-                {displayMode === 'read' ? (
-                    <div>Rating und Statistiken…</div>
-                ) : (
-                    <div>Live-Typing-Statistiken…</div>
-                )}
+                {mode === 'read'
+                    ? <div>Rating &amp; Stats…</div>
+                    : <div>Live Typing Stats…</div>
+                }
             </aside>
         </div>
     );

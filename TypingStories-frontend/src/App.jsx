@@ -20,6 +20,7 @@ export default function App() {
                         <Route path="/discover" element={<Discover />} />
                         <Route path="/my-stories" element={<MyStories />} />
                         <Route path="/writing/new" element={<CreateStory />} />
+                        <Route path="/writing/edit/:storyId" element={<CreateStory />} />
                         <Route path="/typing/:storyId" element={<Practice />} />
                         <Route path="/search" element={<SearchResults />} />
                         <Route path="*" element={<NotFound />} />

@@ -1,54 +1,91 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { fetchMyStories, deleteStory } from '../api/storyService';
 import StoryCard from '../components/StoryCard';
-import { fetchMyStories } from '../api/storyService';
+import { Link, useNavigate } from 'react-router-dom';
 
 export default function MyStories() {
-    const [myStories, setMyStories] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const [stories, setStories] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError]     = useState(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         fetchMyStories()
-            .then(response => {
-                setMyStories(response.data);
+            .then(data => setStories(data))
+            .catch(err => {
+                console.error(err);
+                setError('Error loading stories. Please try again later.');
             })
-            .catch(error => {
-                console.error('Error fetching my stories:', error);
-            })
-            .finally(() => {
-                setIsLoading(false);
-            });
+            .finally(() => setLoading(false));
     }, []);
 
-    if (isLoading) {
-        return <p className="p-6">Loading your stories…</p>;
+    if (loading) {
+        return (
+            <div className="page p-6">
+                <h1 className="text-2xl mb-4">My Stories</h1>
+                <p>Loading…</p>
+            </div>
+        );
     }
 
+    if (error) {
+        return (
+            <div className="page p-6">
+                <h1 className="text-2xl mb-4">My Stories</h1>
+                <p className="text-red-600">{error}</p>
+            </div>
+        );
+    }
+
+    // Handler zum Löschen und State-Update
+    const handleDelete = id => {
+        if (!window.confirm('Story wirklich löschen?')) return;
+        deleteStory(id)
+            .then(() => {
+                setStories(prev => prev.filter(s => s.id !== id));
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Löschen fehlgeschlagen');
+            });
+    };
+
     return (
-        <div className="p-6">
-            <div className="flex justify-between items-center mb-4">
-                <h1 className="text-2xl font-semibold">My Stories</h1>
-                <Link
-                    to="/writing/new"
-                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-500"
-                >
+        <div className="page p-6">
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-2xl">My Stories</h1>
+                <Link to="/writing/new" className="px-4 py-2 bg-green-600 text-white rounded">
                     Create New Story
                 </Link>
             </div>
 
-            {myStories.length > 0 ? (
-                <div className="grid grid-cols-3 gap-4">
-                    {myStories.map(storyItem => (
-                        <StoryCard
-                            key={storyItem.id}
-                            storyObject={storyItem}
-                        />
-                    ))}
-                </div>
+            {stories.length === 0 ? (
+                <p>You have no stories yet. Write a new one!</p>
             ) : (
-                <p className="text-gray-600">
-                    You haven't written any stories yet.
-                </p>
+                <ul className="space-y-6">
+                    {stories.map(story => (
+                        <li key={story.id} className="flex items-start space-x-4">
+                            {/* Story-Card */}
+                            <StoryCard story={story} />
+
+                            {/* Aktionen: Edit / Delete */}
+                            <div className="flex flex-col space-y-2 mt-4">
+                                <button
+                                    onClick={() => navigate(`/writing/edit/${story.id}`)}
+                                    className="px-4 py-2 bg-yellow-500 text-white rounded"
+                                >
+                                    Edit
+                                </button>
+                                <button
+                                    onClick={() => handleDelete(story.id)}
+                                    className="px-4 py-2 bg-red-600 text-white rounded"
+                                >
+                                    Delete
+                                </button>
+                            </div>
+                        </li>
+                    ))}
+                </ul>
             )}
         </div>
     );

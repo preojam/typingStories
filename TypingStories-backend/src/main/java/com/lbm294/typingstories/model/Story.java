@@ -14,17 +14,19 @@ public class Story {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-
     @NotBlank
     private String title;
 
     @ManyToOne
-    @JoinColumn(name = "genreId")
+    @JoinColumn(name = "genre_id")
     private Genre genre;
 
     @Lob
     private String content;
 
+    /**
+     * URL zum Cover-Bild, z.B. "/uploads/5.png"
+     */
     private String coverUrl;
 
     @OneToMany(mappedBy = "story", cascade = CascadeType.ALL)
@@ -32,7 +34,10 @@ public class Story {
     private List<Score> scores = new ArrayList<>();
 
     @OneToMany(mappedBy = "story", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<TypingResult> typingResults = new ArrayList<>();
+
+    // --- Getter & Setter ---
 
     public Long getId() {
         return id;
@@ -66,6 +71,14 @@ public class Story {
         this.content = content;
     }
 
+    public String getCoverUrl() {
+        return coverUrl;
+    }
+
+    public void setCoverUrl(String coverUrl) {
+        this.coverUrl = coverUrl;
+    }
+
     public List<Score> getScores() {
         return scores;
     }
@@ -80,12 +93,5 @@ public class Story {
 
     public void setTypingResults(List<TypingResult> typingResults) {
         this.typingResults = typingResults;
-    }
-
-    public String getCoverUrl() {
-        return coverUrl;
-    }
-    public void setCoverUrl(String coverUrl) {
-        this.coverUrl = coverUrl;
     }
 }

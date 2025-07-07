@@ -40,6 +40,13 @@ public class GenreController {
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<Genre>> createBatch(@RequestBody List<Genre> genres) {
+        List<Genre> saved = genreRepo.saveAll(genres);
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+    }
+
+
     @PutMapping("/{id}")
     public ResponseEntity<Genre> update(@PathVariable Long id, @RequestBody @Valid Genre genre) {
         if (!genreRepo.existsById(id)) {

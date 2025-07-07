@@ -1,14 +1,26 @@
 import { useEffect, useState } from 'react';
 import StoryCard from '../components/StoryCard';
-import { fetchAllStories, fetchLastReadStory } from '../api/storyService.js';
+import { fetchAllStories, fetchLastReadStory } from '../api/storyService';
 
 export default function Home() {
-    const [stories, setAllStories] = useState([]);
-    const [last, setLastStory] = useState(null);
+    const [stories, setStories] = useState([]);      // immer ein Array
+    const [lastStory, setLastStory] = useState(null);
 
     useEffect(() => {
-        fetchAllStories().then(r => setAllStories(r.data));
-        fetchLastReadStory().then(r => setLastStory(r.data))
+        // Hol alle Stories (Service liefert bereits res.data)
+        fetchAllStories()
+            .then(data => {
+                console.log('Fetched stories:', data);
+                setStories(data || []);
+            })
+            .catch(err => {
+                console.error('Error loading all stories', err);
+                setStories([]);
+            });
+
+        // Hol die letzte gelesene Story
+        fetchLastReadStory()
+            .then(data => setLastStory(data))
             .catch(() => setLastStory(null));
     }, []);
 
@@ -19,17 +31,20 @@ export default function Home() {
                     <h1 className="text-2xl mb-2">Welcome to TypingStories</h1>
                     <p>Words connect worlds…</p>
                 </div>
-                {last && (
+
+                {lastStory && (
                     <div className="w-1/3">
                         <h2 className="mb-2">Last Read</h2>
-                        <StoryCard story={last} />
+                        <StoryCard story={lastStory} />
                     </div>
                 )}
             </div>
 
             <h2 className="text-xl">All Stories</h2>
             <div className="grid grid-cols-3 gap-4">
-                {stories.map(s => <StoryCard key={s.id} story={s} />)}
+                {stories.map(s => (
+                    <StoryCard key={s.id} story={s} />
+                ))}
             </div>
         </div>
     );

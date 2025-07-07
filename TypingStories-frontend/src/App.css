@@ -191,3 +191,52 @@ body {
 .typing-text .pending {
     color: #eee;
 }
+
+/*---------------------------------------------------------------------------------------------------------------------*/
+
+.story-card__cover {
+    width: 120px;          /* füllt die Karten-Breite */
+    height: 150px;        /* fix 150px hoch */
+    object-fit: cover;    /* zentriert und schneidet aus */
+    border-bottom-left-radius: 0.5rem;
+    border-bottom-right-radius: 0.5rem;
+}
+
+/* Container erhält Zeilenumbrüche und Word-Wrap */
+.typing-text {
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    position: relative;
+}
+
+/* korrekt getippte Zeichen orange */
+.typing-text .correct {
+    color: lightgrey;
+    background-color: transparent;
+}
+
+/* falsch getippte Zeichen rot */
+.typing-text .incorrect {
+    color: #c0392b;
+    background-color: transparent;
+}
+
+/* noch nicht getippte Zeichen dunkler grau */
+.typing-text .pending {
+    color: #555;
+    background-color: transparent;
+}
+
+/* Cursor-Markierung: blinkender Strich an der aktuellen Position */
+.typing-text .current {
+    color: lightgreen;
+    border-left: 2px solid white;
+    animation: blink 1s step-start infinite;
+}
+
+/* Blink-Animation */
+@keyframes blink {
+    0%, 50%   { border-color: transparent; }
+    51%,100% { border-color: white; }
+}

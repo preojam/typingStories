@@ -1,50 +1,52 @@
-// src/components/StoryCard.jsx
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 
+import CoverNotAvailable from '../assets/CoverNotAvailable.jpg';
+
 export default function StoryCard({ story }) {
-    // Wenn in der DB kein coverUrl angegeben wurde, auf Default-Cover zurück­greifen
-    const coverImageUrl = story.coverUrl
+    if (!story) return null;
+
+    const coverSrc = story.coverUrl
         ? `http://localhost:8080${story.coverUrl}`
-        : '/default-cover.png';
+        : CoverNotAvailable;
+
+    const maxLen = 100;
+    const text = story.content || '';
+    const isLong = text.length > maxLen;
+    const snippet = isLong ? text.substring(0, maxLen) : text;
 
     return (
-        <div className="story-card border rounded-lg overflow-hidden shadow hover:shadow-lg transition">
-            {/** Cover-Bild */}
+        <div className="border rounded-lg overflow-hidden shadow hover:shadow-lg transition">
             <img
-                src={coverImageUrl}
+                src={coverSrc}
                 alt={`Cover for ${story.title}`}
-                className="h-40 w-full object-cover"
+                className="story-card__cover"
+                onError={e => (e.currentTarget.src = CoverNotAvailable)}
             />
-
             <div className="p-4">
-                {/** Titel */}
                 <h3 className="text-lg font-semibold mb-1">{story.title}</h3>
-
-                {/** Genre */}
                 {story.genre && (
                     <p className="text-sm text-gray-600 mb-2">
                         Genre: {story.genre.name}
                     </p>
                 )}
-
-                {/** Inhalts-Vorschau */}
                 {story.content && (
                     <p className="text-sm text-gray-800 mb-4">
-                        {story.content.length > 100
-                            ? story.content.substring(0, 100) + '…'
-                            : story.content}
+                        {snippet}
+                        {isLong && (
+                            <>
+                                …{' '}
+                                <Link
+                                    to={`/typing/${story.id}`}
+                                    className="text-blue-600 underline"
+                                >
+                                    continue reading
+                                </Link>
+                            </>
+                        )}
                     </p>
                 )}
-
-                {/** Link zur Typing-Übung */}
-                <Link
-                    to={`/typing/${story.id}`}
-                    className="inline-block px-3 py-1 bg-blue-600 text-white rounded"
-                >
-                    Weiterlesen
-                </Link>
             </div>
         </div>
     );
@@ -53,11 +55,11 @@ export default function StoryCard({ story }) {
 StoryCard.propTypes = {
     story: PropTypes.shape({
         id: PropTypes.number.isRequired,
-        coverUrl: PropTypes.string,
-        title: PropTypes.string.isRequired,
+        title: PropTypes.string,
+        content: PropTypes.string,
         genre: PropTypes.shape({
-            name: PropTypes.string
+            name: PropTypes.string,
         }),
-        content: PropTypes.string
-    }).isRequired
+        coverUrl: PropTypes.string,
+    }),
 };
