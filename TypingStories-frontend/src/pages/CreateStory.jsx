@@ -3,13 +3,15 @@ import React, { useState, useEffect } from 'react';
 import { fetchAllGenres } from '../api/genreService';
 import { createStory, fetchStoryById, updateStory } from '../api/storyService';
 import { useNavigate, useParams } from 'react-router-dom';
+import CoverDropzone from '../components/CoverDropZone';
+import '../App.css';
 
 export default function CreateStory() {
     const { storyId } = useParams();
     const isEdit = Boolean(storyId);
     const navigate = useNavigate();
 
-    const [genres, setGenres] = useState([]);      // immer Array
+    const [genres, setGenres] = useState([]);
     const [formData, setFormData] = useState({
         coverUrl: '',
         title: '',
@@ -19,23 +21,35 @@ export default function CreateStory() {
     const [loading, setLoading] = useState(isEdit);
     const [error, setError] = useState('');
 
-    // 1) Genres laden
+    const coverUrlFull = formData.coverUrl
+        ? `http://localhost:8080${formData.coverUrl}`
+        : '';
+
+    // 1) Genres einmalig laden
     useEffect(() => {
         fetchAllGenres()
-            .then(data => {
-                // data muss hier ein Array sein
-                setGenres(Array.isArray(data) ? data : []);
-            })
-            .catch(err => {
-                console.error('Error loading genres', err);
-                setGenres([]);
-                setError('Konnte Genres nicht laden.');
-            });
+            .then(data => setGenres(Array.isArray(data) ? data : []))
+            .catch(() => setError('Konnte Genres nicht laden.'));
     }, []);
 
-    // 2) Falls Edit-Modus, Story laden
+    // 2) Reset, wenn aus Edit → Create gewechselt wird
+    useEffect(() => {
+        if (!isEdit) {
+            setFormData({
+                coverUrl: '',
+                title: '',
+                genreId: '',
+                content: ''
+            });
+            setLoading(false);
+            setError('');
+        }
+    }, [isEdit]);
+
+    // 3) Laden im Edit-Modus
     useEffect(() => {
         if (!isEdit) return;
+        setLoading(true);
         fetchStoryById(storyId)
             .then(data => {
                 setFormData({
@@ -45,23 +59,17 @@ export default function CreateStory() {
                     content: data.content    || ''
                 });
             })
-            .catch(err => {
-                console.error('Error loading story', err);
-                setError('Konnte Story nicht laden.');
-            })
+            .catch(() => setError('Konnte Story nicht laden.'))
             .finally(() => setLoading(false));
     }, [isEdit, storyId]);
 
-    // 3) Input-Handler
     function handleChange(e) {
         const { name, value } = e.target;
         setFormData(fd => ({ ...fd, [name]: value }));
     }
 
-    // 4) Submit-Handler
     function handleSubmit(e) {
         e.preventDefault();
-        setError('');
         const payload = {
             coverUrl: formData.coverUrl || null,
             title:    formData.title,
@@ -69,107 +77,102 @@ export default function CreateStory() {
             content:  formData.content
         };
 
-        const request = isEdit
+        const req = isEdit
             ? updateStory(storyId, payload)
             : createStory(payload);
 
-        request
+        req
             .then(() => navigate('/my-stories'))
-            .catch(err => {
-                console.error('Error saving story', err);
-                setError('Speichern fehlgeschlagen. Bitte prüfe alle Felder.');
-            });
+            .catch(() => setError('Speichern fehlgeschlagen.'));
     }
 
-    // 5) Abbrechen
     function handleCancel() {
         navigate(-1);
     }
 
-    if (loading) return <p>Loading…</p>;
+    if (loading) {
+        return <p>Loading…</p>;
+    }
 
     return (
-        <div className="create-story p-6 max-w-xl mx-auto">
-            <h2 className="text-2xl mb-4">
+        <div className="create-story">
+            <h2 className="page-title">
                 {isEdit ? 'Edit Story' : 'Create New Story'}
             </h2>
 
-            {error && <p className="text-red-600 mb-4">{error}</p>}
+            {error && <p className="form-error">{error}</p>}
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-                {/* Cover URL */}
-                <div>
-                    <label className="block mb-1 font-medium">Cover Image URL</label>
-                    <input
-                        type="text"
-                        name="coverUrl"
-                        value={formData.coverUrl}
-                        onChange={handleChange}
-                        className="w-full border px-3 py-2 rounded"
-                        placeholder="https://..."
+            <form onSubmit={handleSubmit} className="form-layout">
+                {/* Linke Spalte: Cover */}
+                <div className="cover-column">
+                    <CoverDropzone
+                        storyId={storyId}
+                        existingCoverUrl={coverUrlFull}
+                        onUploadSuccess={() => {
+                            if (isEdit) {
+                                fetchStoryById(storyId).then(data =>
+                                    setFormData(fd => ({ ...fd, coverUrl: data.coverUrl || '' }))
+                                );
+                            }
+                        }}
                     />
                 </div>
 
-                {/* Title */}
-                <div>
-                    <label className="block mb-1 font-medium">Title</label>
-                    <input
-                        type="text"
-                        name="title"
-                        value={formData.title}
-                        onChange={handleChange}
-                        required
-                        className="w-full border px-3 py-2 rounded"
-                    />
-                </div>
+                {/* Rechte Spalte: Details */}
+                <div className="details-column">
+                    <div className="form-group">
+                        <label>Titel</label>
+                        <input
+                            type="text"
+                            name="title"
+                            value={formData.title}
+                            onChange={handleChange}
+                            required
+                            className="form-input"
+                        />
+                    </div>
 
-                {/* Genre */}
-                <div>
-                    <label className="block mb-1 font-medium">Genre</label>
-                    <select
-                        name="genreId"
-                        value={formData.genreId}
-                        onChange={handleChange}
-                        required
-                        className="w-full border px-3 py-2 rounded"
-                    >
-                        <option value="">-- select genre --</option>
-                        {(genres || []).map(g => (
-                            <option key={g.id} value={g.id}>
-                                {g.name}
-                            </option>
-                        ))}
-                    </select>
-                </div>
+                    <div className="form-group">
+                        <label>Genre</label>
+                        <select
+                            name="genreId"
+                            value={formData.genreId}
+                            onChange={handleChange}
+                            required
+                            className="form-input"
+                        >
+                            <option value="">-- select genre --</option>
+                            {genres.map(g => (
+                                <option key={g.id} value={g.id}>
+                                    {g.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
 
-                {/* Content */}
-                <div>
-                    <label className="block mb-1 font-medium">Content</label>
-                    <textarea
-                        name="content"
-                        value={formData.content}
-                        onChange={handleChange}
-                        rows={8}
-                        required
-                        className="w-full border px-3 py-2 rounded"
-                    />
-                </div>
+                    <div className="form-group">
+                        <label>Content</label>
+                        <textarea
+                            name="content"
+                            value={formData.content}
+                            onChange={handleChange}
+                            required
+                            className="form-textarea"
+                        />
+                    </div>
 
-                {/* Buttons */}
-                <div className="flex space-x-4">
-                    <button
-                        type="submit"
-                        className="px-4 py-2 bg-blue-600 text-white rounded"
-                    >
-                        {isEdit ? 'Update Story' : 'Save Story'}
-                    </button>
-                    <button
-                        type="button"
-                        onClick={handleCancel}
-                        className="px-4 py-2 bg-gray-400 text-white rounded"
-                    >
-                        Cancel
-                    </button>
+                    <div className="form-actions">
+                        <button type="submit" className="btn btn-primary">
+                            {isEdit ? 'Update Story' : 'Save Story'}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={handleCancel}
+                            className="btn btn-secondary"
+                        >
+                            Cancel
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>

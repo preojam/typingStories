@@ -150,7 +150,6 @@ body {
 /*-----------------------------------------------------------------------------------------------------------*/
 
 .typing-page {
-    background: #111;
     color: #eee;
     padding: 2rem;
     height: 100vh;
@@ -212,7 +211,7 @@ body {
 
 /* korrekt getippte Zeichen orange */
 .typing-text .correct {
-    color: lightgrey;
+    color: greenyellow;
     background-color: transparent;
 }
 
@@ -240,3 +239,119 @@ body {
     0%, 50%   { border-color: transparent; }
     51%,100% { border-color: white; }
 }
+/*--------------------------------------------------------------------------------------------------------------------------*/
+/*cover*/
+.cover-input {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Klassen für alle Text-/Select-Inputs */
+.form-input {
+    width: 250px;
+    padding: 0.75rem;        /* 12px */
+    font-size: 1rem;         /* 16px */
+    height: 3rem;            /* 48px */
+    line-height: 1.25;
+    border: 1px solid #666;
+    border-radius: 0.375rem; /* 6px */
+    background: #222;        /* dunkler Hintergrund */
+    color: #eee;
+    box-sizing: border-box;  /* Padding wird in Breite eingerechnet */
+    margin-bottom: 1rem;
+}
+
+/* Klasse nur für Textarea */
+.form-textarea {
+    width: 600px;
+    padding: 0.75rem;
+    font-size: 1rem;
+    min-height: 700px;       /* ca. 12 Zeilen */
+    line-height: 1.5;
+    border: 1px solid #666;
+    border-radius: 0.375rem;
+    background: #222;
+    color: #eee;
+    resize: vertical;        /* nur vertikal anpassbar */
+    box-sizing: border-box;
+    margin-bottom: 1rem;
+}
+
+/* Optional: einheitliches Label-Style */
+.create-story label {
+    display: block;
+    color: #fff;
+    margin-bottom: 0.25rem;
+}
+
+/* Dropzone-Container */
+.dropzone {
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color .2s;
+    margin-bottom: 1rem;
+    width: 100px;
+    height: 150px;
+}
+
+.dropzone.active {
+    border-color: #007bff;
+}
+
+/* Vorschau-Bild */
+.cover-preview {
+    display: block;
+    max-width: 200px;
+    max-height: 200px;
+    margin: 0 auto;
+    border-radius: 4px;
+}
+
+/*------------------------------------Discover---------------------------------------------------------------*/
+
+/* Genre-Badge als Pill */
+.genre-badge {
+    display: inline-block;
+    margin: 0.25rem;
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    background-color: #444;       /* dunkler Shade */
+    color: #fff;                  /* weiße Schrift */
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: background-color 0.2s;
+}
+
+.genre-badge:hover {
+    background-color: #666;       /* helleres Grau beim Hover */
+    color: #fff;
+}
+
+/* === Neues Flex-Layout für CreateStory === */
+.form-layout {
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+}
+
+/* Linke Spalte: Cover */
+.cover-column {
+    flex: 0 0 200px;       /* feste Breite von 200px */
+}
+
+/* Rechte Spalte: alle restlichen Eingabefelder */
+.details-column {
+    flex: 1;               /* füllt den Rest */
+}
+
+/* Falls Du eine Wrapper-Klasse um Cover+Details hast: */
+.create-story form {
+    display: flex;
+    gap: 2rem;
+}
+
+

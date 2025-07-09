@@ -30,13 +30,21 @@ public class StoryController {
         this.genreRepo = genreRepo;
     }
 
-    /** Alle Stories */
+    /**
+     * Alle Stories abrufen oder nach Genre filtern, wenn ?genreId=… gesetzt ist.
+     * GET /api/stories?genreId={id}
+     */
     @GetMapping
-    public List<Story> getAll() {
+    public List<Story> getAll(
+            @RequestParam(value = "genreId", required = false) Long genreId
+    ) {
+        if (genreId != null) {
+            return storyRepo.findByGenreId(genreId);
+        }
         return storyRepo.findAll();
     }
 
-    /** Einzelne Story */
+    /** Einzelne Story abrufen */
     @GetMapping("/{id}")
     public ResponseEntity<Story> getById(@PathVariable Long id) {
         return storyRepo.findById(id)
@@ -44,7 +52,7 @@ public class StoryController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    /** Letzte Story */
+    /** Letzte Story abrufen */
     @GetMapping("/last")
     public ResponseEntity<Story> getLastStory() {
         return storyRepo.findTopByOrderByIdDesc()
@@ -52,7 +60,7 @@ public class StoryController {
                 .orElse(ResponseEntity.noContent().build());
     }
 
-    /** "Meine" Stories (derzeit einfach alle; später nach User filtern) */
+    /** "Meine" Stories (aktuell einfach alle; später nach Nutzer filtern) */
     @GetMapping("/mine")
     public ResponseEntity<List<Story>> getMyStories() {
         List<Story> mine = storyRepo.findAll();
@@ -71,7 +79,7 @@ public class StoryController {
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
-    /** Story updaten */
+    /** Story aktualisieren */
     @PutMapping("/{id}")
     public ResponseEntity<Story> update(
             @PathVariable Long id,
@@ -98,7 +106,7 @@ public class StoryController {
         return ResponseEntity.noContent().build();
     }
 
-    /** Cover-Upload */
+    /** Cover-Upload für eine Story */
     @PostMapping("/{id}/cover")
     public ResponseEntity<Void> uploadCover(
             @PathVariable Long id,
@@ -106,7 +114,7 @@ public class StoryController {
     ) throws IOException {
         Story story = storyRepo.findById(id).orElseThrow();
 
-        // Nur Bilder zulassen
+        // Nur Bilddateien erlauben
         String contentType = file.getContentType();
         if (contentType == null || !contentType.startsWith("image/")) {
             return ResponseEntity
@@ -114,12 +122,10 @@ public class StoryController {
                     .build();
         }
 
-        // Extension extrahieren
+        // Dateiendung prüfen
         String ext = FilenameUtils.getExtension(
                 Objects.requireNonNull(file.getOriginalFilename())
         ).toLowerCase();
-
-        // Whitelist
         List<String> allowed = List.of("png", "jpg", "jpeg", "gif");
         if (!allowed.contains(ext)) {
             return ResponseEntity
@@ -127,12 +133,12 @@ public class StoryController {
                     .build();
         }
 
-        // Verzeichnis anlegen & Datei speichern
+        // Upload-Verzeichnis anlegen und Datei speichern
         Files.createDirectories(uploadDir);
         Path dest = uploadDir.resolve(id + "." + ext);
         file.transferTo(dest.toFile());
 
-        // URL setzen und speichern
+        // Cover-URL in der Story hinterlegen
         story.setCoverUrl("/uploads/" + dest.getFileName());
         storyRepo.save(story);
 

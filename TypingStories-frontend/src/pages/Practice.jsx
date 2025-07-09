@@ -93,7 +93,7 @@ export default function Practice() {
             <aside className="w-1/4 p-4 border-l">
                 {mode === 'read'
                     ? <div>Rating &amp; Stats…</div>
-                    : <div>Live Typing Stats…</div>
+                    : <div> </div>
                 }
             </aside>
         </div>

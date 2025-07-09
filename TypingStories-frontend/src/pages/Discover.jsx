@@ -1,61 +1,62 @@
 // src/pages/Discover.jsx
-import { useEffect, useState } from 'react';
-import GenreBadge from '../components/GenreBadge';
-import StoryCard from '../components/StoryCard';
-import { fetchAllGenres } from '../api/genreService.js';
-import { fetchStoriesByGenre } from '../api/storyService';
+import React, { useEffect, useState } from 'react';
+import { useSearchParams }         from 'react-router-dom';
+import GenreBadge                  from '../components/GenreBadge';
+import StoryCard                   from '../components/StoryCard';
+import { fetchAllGenres }          from '../api/genreService';
+import { fetchStoriesByGenre }     from '../api/storyService';
 
 export default function Discover() {
-    const [genres, setGenres] = useState([]);
-    const [selectedGenre, setSelectedGenre] = useState(null);
-    const [storiesByGenre, setStoriesByGenre] = useState([]);
+    const [genres, setGenres]           = useState([]);
+    const [stories, setStories]         = useState([]);
+    const [error, setError]             = useState('');
+    const [searchParams]                = useSearchParams();
+    const genreIdParam                  = Number(searchParams.get('genreId'));
 
-    // beim Initial-Mount alle Genres laden
+    // 1) Genres laden
     useEffect(() => {
         fetchAllGenres()
-            .then(response => setGenres(response.data))
-            .catch(console.error);
+            .then(data => setGenres(data))
+            .catch(() => setError('Genres could not be loaded. Please try again later.'));
     }, []);
 
-    // jedes Mal, wenn sich `selectedGenre` ändert, Stories nach Genre laden
+    // 2) Wenn queryParam „genreId“ da ist, Stories laden
     useEffect(() => {
-        if (selectedGenre) {
-            fetchStoriesByGenre(selectedGenre.id)
-                .then(response => setStoriesByGenre(response.data))
-                .catch(console.error);
-        } else {
-            setStoriesByGenre([]); // Clear, wenn kein Genre ausgewählt
+        if (!genreIdParam) {
+            setStories([]);
+            return;
         }
-    }, [selectedGenre]);
+        fetchStoriesByGenre(genreIdParam)
+            .then(data => setStories(data))
+            .catch(() => setError('Stories could not be loaded. Please try again later.'));
+    }, [genreIdParam]);
 
     return (
-        <div className="p-6">
-            {/* Genre-Leiste */}
-            <div className="flex space-x-2 overflow-x-auto mb-4">
-                {genres.map(genre => (
-                    <GenreBadge
-                        key={genre.id}
-                        genreObject={genre}
-                        isActive={selectedGenre?.id === genre.id}
-                        onClick={() => setSelectedGenre(genre)}
-                    />
+        <div className="p-6 space-y-6">
+            <h1 className="text-2xl font-semibold">Discover</h1>
+
+            {error && <p className="text-red-500">{error}</p>}
+
+            {/* Genre-Pillen */}
+            <div className="flex flex-wrap">
+                {genres.map(g => (
+                    <GenreBadge key={g.id} genre={g} />
                 ))}
             </div>
 
-            {/* Story-Raster oder Hinweis */}
-            {selectedGenre ? (
-                <div>
-                    <h2 className="text-xl font-semibold mb-2">
-                        {selectedGenre.name} Stories
-                    </h2>
+            {/* Stories zum gewählten Genre */}
+            {genreIdParam ? (
+                stories.length > 0 ? (
                     <div className="grid grid-cols-3 gap-4">
-                        {storiesByGenre.map(story => (
-                            <StoryCard key={story.id} storyObject={story} />
+                        {stories.map(s => (
+                            <StoryCard key={s.id} story={s} />
                         ))}
                     </div>
-                </div>
+                ) : (
+                    <p className="text-gray-500">No stories in this genre yet.</p>
+                )
             ) : (
-                <p className="text-gray-600">Bitte wähle zuerst ein Genre aus.</p>
+                <p className="text-gray-600">Please choose a genre.</p>
             )}
         </div>
     );
