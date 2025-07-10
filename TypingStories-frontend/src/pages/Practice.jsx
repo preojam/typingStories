@@ -1,69 +1,69 @@
-// src/pages/Practice.jsx
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams }          from 'react-router-dom';
 import ToggleSwitch           from '../components/ToggleSwitch';
 import TextDisplay            from '../components/TextDisplay';
 import TypingPage             from '../components/TypingPage';
+import RatingsPanel           from '../components/RatingsPanel';
 import { fetchStoryById }     from '../api/storyService';
 
 export default function Practice() {
     const { storyId } = useParams();
-    const [story, setStory] = useState(null);
-    const [mode, setMode]   = useState('read');    // 'read' oder 'type'
+
+    // ── Hooks ganz oben ─────────────────────────
+    const [story, setStory]           = useState(null);
+    const [mode, setMode]             = useState('read');
     const [chapterIdx, setChapterIdx] = useState(0);
 
-    // 1) Story laden
+    // ── Daten laden ────────────────────────────
     useEffect(() => {
         fetchStoryById(storyId)
             .then(data => {
-                setStory(data);       // <-- hier nicht data.data!
-                setChapterIdx(0);     // erstes „Kapitel“
+                setStory(data);
+                setChapterIdx(0);
             })
-            .catch(err => console.error(err));
+            .catch(console.error);
     }, [storyId]);
 
-    if (!story) return <p>Loading…</p>;
+    // ── Loading-State ──────────────────────────
+    if (!story) {
+        return <p>Loading…</p>;
+    }
 
-    // 2) Splitting nach „## Kapitel“-Marker im Text
+    // ── Kapitel-Split & Objekte ───────────────
     const raw = story.content || '';
-    const parts = raw
-        .split(/^##\s+/m)
-        .filter(p => p.trim().length);
-
-    // 3) Kapitel-Objekte bauen
+    const parts = raw.split(/^##\s+/m).filter(p => p.trim());
     const chapters = parts.map((p, i) => {
         const [titleLine, ...lines] = p.split('\n');
         return {
-            id:      i + 1,
-            title:   titleLine.trim(),
-            text:    lines.join('\n').trim()
+            id:    i + 1,
+            title: titleLine.trim() || `Chapter ${i+1}`,
+            text:  lines.join('\n').trim()
         };
     });
-
-    // 4) aktuellen Index absichern
     const current = chapters[chapterIdx] || chapters[0];
 
+    // ── Render ─────────────────────────────────
     return (
-        <div className="flex h-full">
+        <div className="practice-page">
             {/* linke Sidebar */}
-            <aside className="w-1/4 p-4 border-r">
-                <h2 className="font-bold mb-4">{story.title}</h2>
+            <aside className="sidebar-left">
+                <h2 className="story-title">{story.title}</h2>
                 <ul>
                     {chapters.map(ch => (
                         <li
                             key={ch.id}
-                            className={`cursor-pointer py-1 ${chapterIdx === ch.id-1 ? 'font-bold' : ''}`}
-                            onClick={() => setChapterIdx(ch.id - 1)}
+                            className={chapterIdx === ch.id-1 ? 'active' : ''}
+                            onClick={() => setChapterIdx(ch.id-1)}
                         >
-                            {ch.title || `Chapter ${ch.id}`}
+                            {ch.title}
                         </li>
                     ))}
                 </ul>
             </aside>
 
             {/* Hauptbereich */}
-            <main className="flex-1 p-6">
-                <div className="flex justify-end mb-4">
+            <main className="content-area">
+                <div className="mode-switch">
                     <ToggleSwitch
                         selectedValue={mode}
                         options={[
@@ -88,14 +88,6 @@ export default function Practice() {
                     />
                 )}
             </main>
-
-            {/* rechte Sidebar */}
-            <aside className="w-1/4 p-4 border-l">
-                {mode === 'read'
-                    ? <div>Rating &amp; Stats…</div>
-                    : <div> </div>
-                }
-            </aside>
         </div>
     );
 }

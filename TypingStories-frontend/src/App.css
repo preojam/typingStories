@@ -249,7 +249,7 @@ body {
 
 /* Klassen für alle Text-/Select-Inputs */
 .form-input {
-    width: 250px;
+    width: 200px;
     padding: 0.75rem;        /* 12px */
     font-size: 1rem;         /* 16px */
     height: 3rem;            /* 48px */
@@ -352,6 +352,60 @@ body {
 .create-story form {
     display: flex;
     gap: 2rem;
+}
+/*----------------------rating-------------------------------------------------------------*/
+/* RatingsPanel */
+.ratings-panel {
+    background: #222;
+    padding: 1rem;
+    border-radius: 6px;
+    color: #eee;
+}
+.ratings-panel ul {
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+/* src/pages/Practice.css */
+.practice-page {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+}
+.sidebar-left,
+.sidebar-right {
+    width: 150px;
+    padding: 1rem;
+    background: #222;
+    color: #eee;
+    border-radius: 4px;
+}
+main {
+    flex: 1;
+    padding: 1rem;
+}
+.mode-switch {
+    text-align: right;
+    margin-bottom: 1rem;
+}
+.sidebar-left ul {
+    list-style: none;
+    padding: 0;
+}
+.sidebar-left li {
+    cursor: pointer;
+    margin-bottom: 0.5rem;
+}
+.sidebar-left li.active {
+    font-weight: bold;
+}
+
+.sidebar-right .form-input {
+    width: 120px;
+    height: 2rem;
+}
+.content-area {
+    width: 750px;
 }
 
 
