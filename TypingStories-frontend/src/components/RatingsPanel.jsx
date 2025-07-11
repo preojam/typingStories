@@ -97,7 +97,7 @@ export default function RatingsPanel({ storyId }) {
             <ul className="mt-4 list-disc list-inside text-sm">
                 {scores.map(s => (
                     <li key={s.id}>
-                        {s.createdAt?.substring(0,10) || ''}: {s.value.toFixed(1)} ({s.component})
+                        {s.createdAt?.substring(0,10) || ''} {s.value.toFixed(1)} ({s.component})
                     </li>
                 ))}
             </ul>

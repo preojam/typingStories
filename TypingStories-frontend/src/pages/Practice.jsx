@@ -1,3 +1,4 @@
+// src/pages/Practice.jsx
 import React, { useState, useEffect } from 'react';
 import { useParams }          from 'react-router-dom';
 import ToggleSwitch           from '../components/ToggleSwitch';
@@ -9,12 +10,12 @@ import { fetchStoryById }     from '../api/storyService';
 export default function Practice() {
     const { storyId } = useParams();
 
-    // ── Hooks ganz oben ─────────────────────────
+    // ── Hooks ─────────────────────────────────────────
     const [story, setStory]           = useState(null);
-    const [mode, setMode]             = useState('read');
+    const [mode, setMode]             = useState('read'); // 'read' oder 'type'
     const [chapterIdx, setChapterIdx] = useState(0);
 
-    // ── Daten laden ────────────────────────────
+    // ── Story laden ───────────────────────────────────
     useEffect(() => {
         fetchStoryById(storyId)
             .then(data => {
@@ -24,14 +25,12 @@ export default function Practice() {
             .catch(console.error);
     }, [storyId]);
 
-    // ── Loading-State ──────────────────────────
-    if (!story) {
-        return <p>Loading…</p>;
-    }
+    if (!story) return <p>Loading…</p>;
 
-    // ── Kapitel-Split & Objekte ───────────────
-    const raw = story.content || '';
-    const parts = raw.split(/^##\s+/m).filter(p => p.trim());
+    // ── Kapitel splitten ──────────────────────────────
+    const parts = (story.content || '')
+        .split(/^##\s+/m)
+        .filter(p => p.trim());
     const chapters = parts.map((p, i) => {
         const [titleLine, ...lines] = p.split('\n');
         return {
@@ -42,7 +41,7 @@ export default function Practice() {
     });
     const current = chapters[chapterIdx] || chapters[0];
 
-    // ── Render ─────────────────────────────────
+    // ── Render ────────────────────────────────────────
     return (
         <div className="practice-page">
             {/* linke Sidebar */}
@@ -74,20 +73,29 @@ export default function Practice() {
                     />
                 </div>
 
-                {mode === 'read' ? (
-                    <TextDisplay
-                        chapterText={current.text}
-                        chapterNumber={current.id}
-                        pageNumber={1}
-                    />
-                ) : (
-                    <TypingPage
-                        text={current.text}
-                        chapter={current.id}
-                        page={1}
-                    />
-                )}
+                <div className="text-wrapper">
+                    {mode === 'read' ? (
+                        <TextDisplay
+                            chapterText={current.text}
+                            chapterNumber={current.id}
+                            pageNumber={1}
+                        />
+                    ) : (
+                        <TypingPage
+                            text={current.text}
+                            chapter={current.id}
+                            page={1}
+                        />
+                    )}
+                </div>
             </main>
+
+            {/* rechte Sidebar NUR im Read-Modus */}
+            {mode === 'read' && (
+                <aside className="sidebar-right">
+                    <RatingsPanel storyId={storyId} />
+                </aside>
+            )}
         </div>
     );
 }
