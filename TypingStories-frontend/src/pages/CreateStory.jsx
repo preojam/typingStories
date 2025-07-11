@@ -1,4 +1,4 @@
-// src/pages/CreateStory.jsx
+
 import React, { useState, useEffect } from 'react';
 import { fetchAllGenres } from '../api/genreService';
 import { createStory, fetchStoryById, updateStory } from '../api/storyService';

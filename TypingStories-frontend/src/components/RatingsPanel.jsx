@@ -1,4 +1,4 @@
-// src/components/RatingsPanel.jsx
+
 import React, { useState, useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { fetchScoresByStory, createScore } from '../api/scoreService';
