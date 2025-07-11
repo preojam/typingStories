@@ -1,10 +1,13 @@
-// src/main/java/com/lbm294/typingstories/controller/ScoreController.java
 package com.lbm294.typingstories.controller;
 
 import com.lbm294.typingstories.model.Score;
 import com.lbm294.typingstories.model.Story;
 import com.lbm294.typingstories.repository.ScoreRepository;
 import com.lbm294.typingstories.repository.StoryRepository;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
@@ -16,6 +19,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/scores")
 @CrossOrigin
+@Tag(name = "Scores", description = "Bewertungen für eine Story")
 public class ScoreController {
 
     private final ScoreRepository scoreRepo;
@@ -27,29 +31,29 @@ public class ScoreController {
         this.storyRepo = storyRepo;
     }
 
-    /**
-     * GET /api/scores?storyId={id}
-     * Wenn storyId gesetzt: nur diese Scores, sonst alle.
-     */
+    @Operation(summary = "Alle Scores (optional nach Story filtern)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Liste der Scores"),
+            @ApiResponse(responseCode = "404", description = "Story nicht gefunden")
+    })
     @GetMapping
     public ResponseEntity<List<Score>> getAll(
             @RequestParam(value = "storyId", required = false) Long storyId
     ) {
-        List<Score> list;
-        if (storyId != null) {
-            if (!storyRepo.existsById(storyId)) {
-                return ResponseEntity.notFound().build();
-            }
-            list = scoreRepo.findByStoryId(storyId);
-        } else {
-            list = scoreRepo.findAll();
+        if (storyId != null && !storyRepo.existsById(storyId)) {
+            return ResponseEntity.notFound().build();
         }
+        List<Score> list = (storyId != null)
+                ? scoreRepo.findByStoryId(storyId)
+                : scoreRepo.findAll();
         return ResponseEntity.ok(list);
     }
 
-    /** POST /api/scores
-     * Body erwartet: { story: { id: … }, component: "...", value: … }
-     */
+    @Operation(summary = "Einen neuen Score anlegen")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Score erstellt"),
+            @ApiResponse(responseCode = "400", description = "Ungültige Anfrage")
+    })
     @PostMapping
     public ResponseEntity<Score> create(@RequestBody @Valid Score score) {
         if (score.getStory() == null || score.getStory().getId() == null) {
@@ -64,7 +68,12 @@ public class ScoreController {
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
-    /** PUT /api/scores/{id} */
+    @Operation(summary = "Bestehenden Score aktualisieren")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Score aktualisiert"),
+            @ApiResponse(responseCode = "400", description = "Ungültige Anfrage"),
+            @ApiResponse(responseCode = "404", description = "Score nicht gefunden")
+    })
     @PutMapping("/{id}")
     public ResponseEntity<Score> update(
             @PathVariable Long id,
@@ -85,7 +94,11 @@ public class ScoreController {
         return ResponseEntity.ok(scoreRepo.save(score));
     }
 
-    /** DELETE /api/scores/{id} */
+    @Operation(summary = "Score löschen")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Score gelöscht"),
+            @ApiResponse(responseCode = "404", description = "Score nicht gefunden")
+    })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         if (!scoreRepo.existsById(id)) {
