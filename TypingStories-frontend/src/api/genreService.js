@@ -1,19 +1,32 @@
-import axios from 'axios';
+const baseURL = 'http://localhost:8080/api';
+const defaultHeaders = { 'Content-Type': 'application/json' };
 
-const apiClient = axios.create({
-    baseURL: 'http://localhost:8080/api',
-    headers: { 'Content-Type': 'application/json' }
-});
+/**
+ * Hilfsfunktion für fetch-Aufrufe
+ * @param {string} path – Endpunkt-Pfad (z.B. '/genres')
+ * @param {object} options – fetch-Optionen (method, headers, body etc.)
+ * @returns {Promise<any>}
+ */
+async function request(path, options = {}) {
+    const res = await fetch(`${baseURL}${path}`, {
+        headers: defaultHeaders,
+        ...options
+    });
+    if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(`HTTP ${res.status}: ${errorText}`);
+    }
+    // Manche DELETE-Antworten liefern keinen Body
+    return res.status !== 204 ? res.json() : null;
+}
 
 /**
  * Gibt alle Genres zurück
  * GET /api/genres
  * @returns {Promise<Array>}
  */
-export function fetchAllGenres() {
-    return apiClient
-        .get('/genres')
-        .then(res => res.data);
+export async function fetchAllGenres() {
+    return await request('/genres');
 }
 
 /**
@@ -22,10 +35,11 @@ export function fetchAllGenres() {
  * @param {{ name: string }} genreData
  * @returns {Promise<Object>}
  */
-export function createGenre(genreData) {
-    return apiClient
-        .post('/genres', genreData)
-        .then(res => res.data);
+export async function createGenre(genreData) {
+    return await request('/genres', {
+        method: 'POST',
+        body: JSON.stringify(genreData)
+    });
 }
 
 /**
@@ -35,19 +49,21 @@ export function createGenre(genreData) {
  * @param {{ name: string }} genreData
  * @returns {Promise<Object>}
  */
-export function updateGenre(genreId, genreData) {
-    return apiClient
-        .put(`/genres/${genreId}`, genreData)
-        .then(res => res.data);
+export async function updateGenre(genreId, genreData) {
+    return await request(`/genres/${genreId}`, {
+        method: 'PUT',
+        body: JSON.stringify(genreData)
+    });
 }
 
 /**
  * Löscht ein Genre
  * DELETE /api/genres/{id}
  * @param {number} genreId
- * @returns {Promise}
+ * @returns {Promise<void>}
  */
-export function deleteGenre(genreId) {
-    return apiClient
-        .delete(`/genres/${genreId}`);
+export async function deleteGenre(genreId) {
+    await request(`/genres/${genreId}`, {
+        method: 'DELETE'
+    });
 }

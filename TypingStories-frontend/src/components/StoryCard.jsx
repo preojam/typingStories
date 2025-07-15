@@ -7,41 +7,48 @@ import CoverNotAvailable from '../assets/CoverNotAvailable.jpg';
 export default function StoryCard({ story }) {
     if (!story) return null;
 
+    // Cover-URL oder Fallback
     const coverSrc = story.coverUrl
         ? `http://localhost:8080${story.coverUrl}`
         : CoverNotAvailable;
 
+    // Snippet max. 100 Zeichen
     const maxLen = 100;
-    const text = story.content || '';
-    const isLong = text.length > maxLen;
-    const snippet = isLong ? text.substring(0, maxLen) : text;
+    const text   = story.content || '';
+    const snippet =
+        text.length > maxLen
+            ? text.substring(0, maxLen).trim() + '…'
+            : text;
 
     return (
-        <div className="border rounded-lg overflow-hidden shadow hover:shadow-lg transition">
+        <div className="story-card">
             <img
+                className="story-card__cover"
                 src={coverSrc}
                 alt={`Cover for ${story.title}`}
-                className="story-card__cover"
                 onError={e => (e.currentTarget.src = CoverNotAvailable)}
             />
-            <div className="p-4">
-                <h3 className="text-lg font-semibold mb-1">{story.title}</h3>
+
+            <div className="story-card__info">
+                <h3 className="story-card__title">{story.title}</h3>
+
                 {story.genre && (
-                    <p className="text-sm text-gray-600 mb-2">
-                        Genre: {story.genre.name}
+                    <p className="story-card__genre">
+                        Genre: <strong>{story.genre.name}</strong>
                     </p>
                 )}
-                {story.content && (
-                    <p className="text-sm text-gray-800 mb-4">
+
+                {snippet && (
+                    <p className="story-card__snippet">
                         {snippet}
-                        {isLong && (
+                        {text.length > maxLen && (
                             <>
-                                …{' '}
+                                {' '}
                                 <Link
                                     to={`/typing/${story.id}`}
-                                    className="text-blue-600 underline"
+                                    className="story-card__more"
                                 >
-                                    continue reading
+                                    continue
                                 </Link>
                             </>
                         )}
@@ -54,10 +61,10 @@ export default function StoryCard({ story }) {
 
 StoryCard.propTypes = {
     story: PropTypes.shape({
-        id: PropTypes.number.isRequired,
-        title: PropTypes.string,
-        content: PropTypes.string,
-        genre: PropTypes.shape({
+        id:       PropTypes.number.isRequired,
+        title:    PropTypes.string,
+        content:  PropTypes.string,
+        genre:    PropTypes.shape({
             name: PropTypes.string,
         }),
         coverUrl: PropTypes.string,

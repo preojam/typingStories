@@ -408,4 +408,55 @@ main {
     width: 750px;
 }
 
+/* -------------------------Grid-Container für die Karten---------------- */
+.story-card {
+    display: flex;
+    background: #1f1f1f;
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+    margin-bottom: 1rem;
+    max-width: 450px;
+    padding: 0.5rem;
+}
 
+.story-card__cover {
+    flex: 0 0 120px;
+    height: 160px;
+    object-fit: cover;
+}
+
+.story-card__info {
+    padding: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.story-card__title {
+    margin: 0 0 0.25rem;
+    font-size: 1.1rem;
+    color: #fff;
+}
+
+.story-card__genre {
+    margin: 0 0 0.5rem;
+    font-size: 0.9rem;
+    color: #bbb;
+}
+
+.story-card__snippet {
+    flex: 1;
+    margin: 0 0 0.5rem;
+    font-size: 0.9rem;
+    color: #ddd;
+}
+
+.story-card__more {
+    color: #5ea9ff;
+    text-decoration: none;
+}
+
+.story-card__more:hover {
+    text-decoration: underline;
+}
