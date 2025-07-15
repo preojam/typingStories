@@ -1,39 +1,40 @@
 import React, { useCallback, useState, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
-import axios from 'axios';
 import PropTypes from 'prop-types';
-
 
 export default function CoverDropzone({ storyId, existingCoverUrl, onUploadSuccess }) {
     const [preview, setPreview] = useState(existingCoverUrl || null);
 
-    // Falls sich das bestehende Cover ändert (Edit-Modus), aktualisiere Preview
+    // Update Preview, wenn sich existingCoverUrl ändert
     useEffect(() => {
         setPreview(existingCoverUrl || null);
     }, [existingCoverUrl]);
 
-    const onDrop = useCallback(files => {
+    const onDrop = useCallback(async files => {
         const file = files[0];
         if (!file) return;
 
-        // Direkt lokale Vorschau anzeigen
+        // Lokale Vorschau anzeigen
         setPreview(URL.createObjectURL(file));
 
         // Multipart-FormData bauen
         const form = new FormData();
         form.append('file', file);
 
-        // Upload-Request
-        axios
-            .post(`http://localhost:8080/api/stories/${storyId}/cover`, form, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            })
-            .then(() => {
-                if (onUploadSuccess) onUploadSuccess();
-            })
-            .catch(err => {
-                console.error('Cover-Upload failed:', err);
+        try {
+            const res = await fetch(`http://localhost:8080/api/stories/${storyId}/cover`, {
+                method: 'POST',
+                body: form
             });
+            if (!res.ok) {
+                const text = await res.text();
+                throw new Error(`Upload-Fehler ${res.status}: ${text}`);
+            }
+            // Erfolgreich hochgeladen
+            onUploadSuccess?.();
+        } catch (err) {
+            console.error('Cover-Upload failed:', err);
+        }
     }, [storyId, onUploadSuccess]);
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -48,11 +49,10 @@ export default function CoverDropzone({ storyId, existingCoverUrl, onUploadSucce
             className={`dropzone ${isDragActive ? 'active' : ''}`}
         >
             <input {...getInputProps()} />
-            {preview ? (
-                <img src={preview} alt="Cover preview" className="cover-preview" />
-            ) : (
-                <p>{isDragActive ? 'Release to upload …' : 'Drag & Drop here or click'}</p>
-            )}
+            {preview
+                ? <img src={preview} alt="Cover preview" className="cover-preview" />
+                : <p>{isDragActive ? 'Release to upload …' : 'Drag & Drop here or click'}</p>
+            }
         </div>
     );
 }
