@@ -9,7 +9,7 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>3.5.3</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <relativePath/>
     </parent>
 
     <groupId>com.LbM294</groupId>
@@ -20,7 +20,22 @@
 
     <properties>
         <java.version>21</java.version>
+        <!-- Wir definieren hier die gemeinsame JUnit-Version -->
+        <junit.jupiter.version>5.12.2</junit.jupiter.version>
     </properties>
+
+    <!-- BOM, damit alle JUnit-Module auf 5.12.2 gebracht werden -->
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>${junit.jupiter.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <!-- Spring Data JPA -->
@@ -62,27 +77,14 @@
             <version>2.2.0</version>
         </dependency>
 
-        <!-- Spring Boot Test (enthält Mockito, JUnit Vintage, JUnit Jupiter Engine usw.) -->
+        <!-- Spring Boot Test: bringt Mockito, JUnit Jupiter etc. passend zur Boot-Version -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
 
-        <!-- JUnit-Jupiter API -->
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <version>5.9.1</version>
-            <scope>test</scope>
-        </dependency>
-        <!-- JUnit-Jupiter Engine -->
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <version>5.9.1</version>
-            <scope>test</scope>
-        </dependency>
+
     </dependencies>
 
     <build>
@@ -99,11 +101,9 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.1.2</version>
                 <configuration>
-                    <!-- Nur Klassen mit *Test.java ausführen -->
                     <includes>
                         <include>**/*Test.java</include>
                     </includes>
-                    <!-- Bei Java 9+ evtl. notwendig, um Modulpfad zu umgehen -->
                     <useModulePath>false</useModulePath>
                 </configuration>
             </plugin>

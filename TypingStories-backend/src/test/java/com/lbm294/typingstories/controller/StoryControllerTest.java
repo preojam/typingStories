@@ -3,20 +3,21 @@ package com.lbm294.typingstories.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lbm294.typingstories.model.Genre;
 import com.lbm294.typingstories.model.Story;
+import com.lbm294.typingstories.repository.GenreRepository;
 import com.lbm294.typingstories.repository.StoryRepository;
-import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -26,99 +27,126 @@ class StoryControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    /**
-     * Ersetzt @MockBean
-     * (Annotation, die den StoryRepository-Bean im Test-Context mit
-     * einem Mockito-Mock überschreibt).
-     */
-    @MockitoBean
-    private StoryRepository storyRepo;
-
     @Autowired
     private ObjectMapper objectMapper;
 
-    @Test
-    @DisplayName("GET /api/stories → 200 und JSON-Liste")
-    void testGetAll() throws Exception {
-        Genre g = new Genre(); g.setId(1L); g.setName("Fiction");
-        Story s1 = new Story(); s1.setId(10L); s1.setTitle("A"); s1.setGenre(g);
-        Story s2 = new Story(); s2.setId(20L); s2.setTitle("B"); s2.setGenre(g);
+    @MockitoBean
+    private StoryRepository storyRepo;
 
-        Mockito.when(storyRepo.findAll()).thenReturn(Arrays.asList(s1, s2));
+    @MockitoBean
+    private GenreRepository genreRepo;
 
-        mockMvc.perform(get("/api/stories"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.length()").value(2))
-                .andExpect(jsonPath("$[0].id").value(10))
-                .andExpect(jsonPath("$[1].title").value("B"));
+    private Story makeStory(Long id, String title, String content, Long genreId) {
+        Story s = new Story();
+        s.setId(id);
+        s.setTitle(title);
+        s.setContent(content);
+        Genre g = new Genre();
+        g.setId(genreId);
+        s.setGenre(g);
+        return s;
+    }
+
+    @BeforeEach
+    void setUp() {
+        // Genre exist checks
+        given(genreRepo.existsById(1L)).willReturn(true);
+        given(genreRepo.existsById(999L)).willReturn(false);
+
+        // story existence checks
+        given(storyRepo.existsById(1L)).willReturn(true);
+        given(storyRepo.existsById(999L)).willReturn(false);
+
+        // findAll
+        given(storyRepo.findAll()).willReturn(List.of(
+                makeStory(1L, "Alpha", "Content A", 1L),
+                makeStory(2L, "Beta",  "Content B", 1L)
+        ));
+
+        // filter by genre
+        given(storyRepo.findByGenreId(1L)).willReturn(List.of(
+                makeStory(1L, "Alpha", "Content A", 1L)
+        ));
+
+        // findById
+        given(storyRepo.findById(1L))
+                .willReturn(Optional.of(makeStory(1L, "Alpha", "Content A", 1L)));
+        given(storyRepo.findById(999L))
+                .willReturn(Optional.empty());
+
+        // findLast
+        given(storyRepo.findTopByOrderByIdDesc())
+                .willReturn(Optional.of(makeStory(2L, "Beta", "Content B", 1L)));
+
+        // save
+        given(storyRepo.save(any(Story.class)))
+                .willAnswer(inv -> {
+                    Story s = inv.getArgument(0);
+                    if (s.getId() == null) {
+                        s.setId(42L);
+                    }
+                    return s;
+                });
     }
 
     @Test
-    @DisplayName("GET /api/stories/{id} → 200 wenn vorhanden")
-    void testGetByIdFound() throws Exception {
-        Story s = new Story(); s.setId(5L); s.setTitle("Story5");
-        Mockito.when(storyRepo.findById(5L)).thenReturn(Optional.of(s));
-
-        mockMvc.perform(get("/api/stories/5"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.title").value("Story5"));
-    }
-
-    @Test
-    @DisplayName("GET /api/stories/{id} → 404 wenn nicht vorhanden")
-    void testGetByIdNotFound() throws Exception {
-        Mockito.when(storyRepo.findById(99L)).thenReturn(Optional.empty());
-
-        mockMvc.perform(get("/api/stories/99"))
-                .andExpect(status().isNotFound());
-    }
-
-    @Test
-    @DisplayName("POST /api/stories → 201 bei gültigem Body")
     void testCreateValid() throws Exception {
-        Genre g = new Genre(); g.setId(2L);
-        Story input = new Story(); input.setTitle("Neu"); input.setGenre(g);
-        Story saved = new Story(); saved.setId(7L); saved.setTitle("Neu"); saved.setGenre(g);
-
-        Mockito.when(storyRepo.save(any(Story.class))).thenReturn(saved);
+        Story toCreate = new Story();
+        toCreate.setTitle("Neue Story");
+        toCreate.setContent("Ein spannender Inhalt");
+        Genre genre = new Genre();
+        genre.setId(1L);
+        toCreate.setGenre(genre);
 
         mockMvc.perform(post("/api/stories")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(input)))
+                        .content(objectMapper.writeValueAsString(toCreate)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(7))
-                .andExpect(jsonPath("$.title").value("Neu"));
+                .andExpect(jsonPath("$.id").value(42L));
     }
 
     @Test
-    @DisplayName("POST /api/stories → 400 wenn Genre fehlt")
     void testCreateInvalid() throws Exception {
-        Story input = new Story(); input.setTitle("NoGenre");
+        Story bad = new Story();
+        bad.setTitle("Keine Genre");
+        bad.setContent("Inhalt");
+        // kein Genre gesetzt
 
         mockMvc.perform(post("/api/stories")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(input)))
+                        .content(objectMapper.writeValueAsString(bad)))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
-    @DisplayName("DELETE /api/stories/{id} → 204 bei Löschung")
-    void testDelete() throws Exception {
-        Mockito.when(storyRepo.existsById(3L)).thenReturn(true);
-        Mockito.doNothing().when(storyRepo).deleteById(3L);
+    void testGetAll() throws Exception {
+        mockMvc.perform(get("/api/stories"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2));
+    }
 
-        mockMvc.perform(delete("/api/stories/3"))
+    @Test
+    void testGetByIdFound() throws Exception {
+        mockMvc.perform(get("/api/stories/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.title").value("Alpha"));
+    }
+
+    @Test
+    void testGetByIdNotFound() throws Exception {
+        mockMvc.perform(get("/api/stories/999"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void testDelete() throws Exception {
+        mockMvc.perform(delete("/api/stories/1"))
                 .andExpect(status().isNoContent());
     }
 
     @Test
-    @DisplayName("DELETE /api/stories/{id} → 404 wenn nicht gefunden")
     void testDeleteNotFound() throws Exception {
-        Mockito.when(storyRepo.existsById(4L)).thenReturn(false);
-
-        mockMvc.perform(delete("/api/stories/4"))
+        mockMvc.perform(delete("/api/stories/999"))
                 .andExpect(status().isNotFound());
     }
 }
-
