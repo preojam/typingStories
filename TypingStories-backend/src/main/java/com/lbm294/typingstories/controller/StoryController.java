@@ -19,6 +19,14 @@ import java.nio.file.*;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * REST-Controller für die Verwaltung von Story-Ressourcen.
+ * <p>
+ * Bietet CRUD-Endpunkte für Stories sowie eine Funktion zum
+ * Upload eines Cover-Bildes für eine Story.
+ * Optional kann nach Genre gefiltert werden.
+ * </p>
+ */
 @RestController
 @RequestMapping("/api/stories")
 @CrossOrigin
@@ -27,14 +35,30 @@ public class StoryController {
 
     private final StoryRepository storyRepo;
     private final GenreRepository genreRepo;
+
+    /**
+     * Verzeichnis im Dateisystem, in dem hochgeladene Cover-Bilder abgelegt werden.
+     */
     private final Path uploadDir = Path.of("uploads");
 
+    /**
+     * Konstruktor für StoryController.
+     *
+     * @param storyRepo Repository für Story-Entitäten
+     * @param genreRepo Repository für Genre-Entitäten
+     */
     @Autowired
     public StoryController(StoryRepository storyRepo, GenreRepository genreRepo) {
         this.storyRepo = storyRepo;
         this.genreRepo = genreRepo;
     }
 
+    /**
+     * Gibt alle Stories zurück, optional gefiltert nach Genre.
+     *
+     * @param genreId (optional) ID des Genres, nach dem gefiltert werden soll
+     * @return Liste der Stories
+     */
     @Operation(summary = "Alle Stories abrufen (optional nach Genre filtern)")
     @ApiResponse(responseCode = "200", description = "Liste der Stories")
     @GetMapping
@@ -47,6 +71,12 @@ public class StoryController {
         return storyRepo.findAll();
     }
 
+    /**
+     * Gibt eine Story anhand ihrer ID zurück.
+     *
+     * @param id ID der abzufragenden Story
+     * @return ResponseEntity mit der Story und Status 200 oder 404
+     */
     @Operation(summary = "Story nach ID abrufen")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Story gefunden"),
@@ -59,6 +89,12 @@ public class StoryController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    /**
+     * Gibt die zuletzt erstellte Story zurück.
+     *
+     * @return ResponseEntity mit der letzten Story und Status 200,
+     *         oder Status 204, wenn keine Story existiert
+     */
     @Operation(summary = "Letzte Story abrufen")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Letzte Story"),
@@ -71,6 +107,11 @@ public class StoryController {
                 .orElse(ResponseEntity.noContent().build());
     }
 
+    /**
+     * Gibt alle eigenen Stories zurück (Dummy-Implementierung).
+     *
+     * @return ResponseEntity mit der Liste eigener Stories
+     */
     @Operation(summary = "Eigene Stories abrufen")
     @ApiResponse(responseCode = "200", description = "Liste eigener Stories")
     @GetMapping("/mine")
@@ -78,6 +119,13 @@ public class StoryController {
         return ResponseEntity.ok(storyRepo.findAll());
     }
 
+    /**
+     * Legt eine neue Story an.
+     *
+     * @param story Story-Objekt im Request-Body (muss gültig sein und ein Genre enthalten)
+     * @return ResponseEntity mit der erstellten Story und Status 201,
+     *         oder Status 400 bei ungültiger Genre-Angabe
+     */
     @Operation(summary = "Neue Story anlegen")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Story erstellt"),
@@ -94,6 +142,14 @@ public class StoryController {
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
+    /**
+     * Aktualisiert eine bestehende Story.
+     *
+     * @param id    ID der zu aktualisierenden Story
+     * @param story Story-Objekt im Request-Body (muss gültig sein und ein Genre enthalten)
+     * @return ResponseEntity mit der aktualisierten Story und Status 200,
+     *         oder Status 400/404 bei ungültigen Daten oder nicht gefundener Story
+     */
     @Operation(summary = "Story aktualisieren")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Story aktualisiert"),
@@ -115,6 +171,12 @@ public class StoryController {
         return ResponseEntity.ok(storyRepo.save(story));
     }
 
+    /**
+     * Löscht eine Story anhand ihrer ID.
+     *
+     * @param id ID der zu löschenden Story
+     * @return ResponseEntity mit Status 204 bei Erfolg oder 404 bei nicht gefundener Story
+     */
     @Operation(summary = "Story löschen")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Story gelöscht"),
@@ -129,6 +191,14 @@ public class StoryController {
         return ResponseEntity.noContent().build();
     }
 
+    /**
+     * Lädt ein Cover-Bild für eine Story hoch und speichert es im Dateisystem.
+     *
+     * @param id   ID der Story, zu der das Cover gehört
+     * @param file MultipartFile mit dem Bild (muss ein unterstütztes Format sein)
+     * @return ResponseEntity mit Status 200 bei Erfolg oder 415 bei nicht unterstütztem Format
+     * @throws IOException falls ein Fehler beim Schreiben der Datei auftritt
+     */
     @Operation(summary = "Cover-Bild für Story hochladen")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Cover hochgeladen"),

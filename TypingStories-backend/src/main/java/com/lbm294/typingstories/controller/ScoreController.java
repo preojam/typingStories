@@ -16,6 +16,13 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
+/**
+ * REST-Controller für die Verwaltung von Score-Ressourcen.
+ * <p>
+ * Bietet Endpunkte zum Erstellen, Lesen, Aktualisieren und Löschen (CRUD) von Bewertungen
+ * (Scores) für Stories. Optional kann nach Story gefiltert werden.
+ * </p>
+ */
 @RestController
 @RequestMapping("/api/scores")
 @CrossOrigin
@@ -25,12 +32,25 @@ public class ScoreController {
     private final ScoreRepository scoreRepo;
     private final StoryRepository storyRepo;
 
+    /**
+     * Konstruktor für ScoreController.
+     *
+     * @param scoreRepo Repository für Score-Entitäten.
+     * @param storyRepo Repository für Story-Entitäten.
+     */
     @Autowired
     public ScoreController(ScoreRepository scoreRepo, StoryRepository storyRepo) {
         this.scoreRepo = scoreRepo;
         this.storyRepo = storyRepo;
     }
 
+    /**
+     * Gibt alle Scores zurück, optional gefiltert nach Story.
+     *
+     * @param storyId (optional) ID der Story, nach der gefiltert werden soll.
+     * @return {@code ResponseEntity} mit der Liste der Scores und Status 200,
+     *         oder Status 404, wenn die angegebene Story nicht existiert.
+     */
     @Operation(summary = "Alle Scores (optional nach Story filtern)")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Liste der Scores"),
@@ -49,6 +69,14 @@ public class ScoreController {
         return ResponseEntity.ok(list);
     }
 
+    /**
+     * Legt einen neuen Score an.
+     *
+     * @param score Score-Objekt im Request-Body (muss gültig sein und eine Story-ID enthalten).
+     * @return {@code ResponseEntity} mit dem erstellten Score und Status 201,
+     *         oder Status 400 bei fehlender oder ungültiger Story-ID.
+     * @throws ResponseStatusException bei fehlender oder nicht vorhandener Story-ID.
+     */
     @Operation(summary = "Einen neuen Score anlegen")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Score erstellt"),
@@ -68,6 +96,16 @@ public class ScoreController {
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
+    /**
+     * Aktualisiert einen bestehenden Score.
+     *
+     * @param id    ID des zu aktualisierenden Scores.
+     * @param score Score-Objekt im Request-Body (muss gültig sein und eine Story-ID enthalten).
+     * @return {@code ResponseEntity} mit dem aktualisierten Score und Status 200,
+     *         Status 400 bei fehlender oder ungültiger Story-ID,
+     *         oder Status 404, wenn der Score nicht existiert.
+     * @throws ResponseStatusException bei fehlender oder nicht vorhandener Story-ID.
+     */
     @Operation(summary = "Bestehenden Score aktualisieren")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Score aktualisiert"),
@@ -94,6 +132,13 @@ public class ScoreController {
         return ResponseEntity.ok(scoreRepo.save(score));
     }
 
+    /**
+     * Löscht einen Score anhand seiner ID.
+     *
+     * @param id ID des zu löschenden Scores.
+     * @return {@code ResponseEntity} mit Status 204 bei erfolgreichem Löschen,
+     *         oder Status 404, wenn der Score nicht existiert.
+     */
     @Operation(summary = "Score löschen")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Score gelöscht"),

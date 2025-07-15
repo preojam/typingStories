@@ -13,6 +13,14 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * REST-Controller für die Verwaltung von Genre-Ressourcen.
+ * <p>
+ * Bietet Endpunkte zum Erstellen, Lesen, Aktualisieren und Löschen (CRUD)
+ * von Genres. Alle Routen sind unter "/api/genres" erreichbar.
+ * CORS ist standardmäßig aktiviert.
+ * </p>
+ */
 @RestController
 @RequestMapping("/api/genres")
 @CrossOrigin
@@ -21,11 +29,21 @@ public class GenreController {
 
     private final GenreRepository genreRepo;
 
+    /**
+     * Konstruktor für GenreController.
+     *
+     * @param genreRepo Repository für Genre-Entitäten.
+     */
     @Autowired
     public GenreController(GenreRepository genreRepo) {
         this.genreRepo = genreRepo;
     }
 
+    /**
+     * Gibt eine Liste aller vorhandenen Genres zurück.
+     *
+     * @return Liste aller Genres.
+     */
     @Operation(summary = "Alle Genres abrufen")
     @ApiResponse(responseCode = "200", description = "Liste aller Genres")
     @GetMapping
@@ -33,6 +51,13 @@ public class GenreController {
         return genreRepo.findAll();
     }
 
+    /**
+     * Gibt ein Genre anhand seiner ID zurück.
+     *
+     * @param id ID des abzufragenden Genres.
+     * @return {@code ResponseEntity} mit dem Genre und Status 200,
+     *         oder Status 404, wenn das Genre nicht gefunden wurde.
+     */
     @Operation(summary = "Genre nach ID abrufen")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Genre gefunden"),
@@ -45,6 +70,13 @@ public class GenreController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    /**
+     * Legt ein neues Genre an.
+     *
+     * @param genre Genre-Daten im Request-Body (muss gültig sein).
+     * @return {@code ResponseEntity} mit dem erstellten Genre und Status 201,
+     *         oder Status 400 bei ungültigen Daten.
+     */
     @Operation(summary = "Neues Genre anlegen")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Genre erstellt"),
@@ -56,6 +88,12 @@ public class GenreController {
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
+    /**
+     * Legt mehrere neue Genres auf einmal an.
+     *
+     * @param genres Liste der anzulegenden Genres.
+     * @return {@code ResponseEntity} mit den erstellten Genres und Status 201.
+     */
     @Operation(summary = "Mehrere Genres auf einmal anlegen")
     @ApiResponse(responseCode = "201", description = "Genres erstellt")
     @PostMapping("/batch")
@@ -64,6 +102,14 @@ public class GenreController {
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
+    /**
+     * Aktualisiert ein bestehendes Genre.
+     *
+     * @param id    ID des zu aktualisierenden Genres.
+     * @param genre Genre-Daten im Request-Body (muss gültig sein).
+     * @return {@code ResponseEntity} mit dem aktualisierten Genre und Status 200,
+     *         oder Status 404, wenn das Genre nicht gefunden wurde.
+     */
     @Operation(summary = "Genre aktualisieren")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Genre aktualisiert"),
@@ -81,6 +127,13 @@ public class GenreController {
         return ResponseEntity.ok(genreRepo.save(genre));
     }
 
+    /**
+     * Löscht ein Genre anhand seiner ID.
+     *
+     * @param id ID des zu löschenden Genres.
+     * @return {@code ResponseEntity} mit Status 204 bei erfolgreichem Löschen,
+     *         oder Status 404, wenn das Genre nicht gefunden wurde.
+     */
     @Operation(summary = "Genre löschen")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Genre gelöscht"),
