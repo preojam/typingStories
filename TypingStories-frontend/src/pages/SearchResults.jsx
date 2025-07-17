@@ -4,7 +4,7 @@ import StoryCard from '../components/StoryCard';
 import { searchStories } from '../api/storyService.js';
 
 export default function SearchResults() {
-    // Suchbegriff aus URL holen
+    // Suchbegriff aus der URL holen
     const location = useLocation();
     const queryParameters = new URLSearchParams(location.search);
     const searchQuery = queryParameters.get('query') || '';
@@ -17,11 +17,16 @@ export default function SearchResults() {
             setSearchResults([]);
             return;
         }
+
         setIsLoading(true);
-        // API-Aufruf: implementiere dazu in storyService.js eine Funktion searchStories(query)
+
         searchStories(searchQuery)
-            .then(response => {
-                setSearchResults(response.data);
+            .then(data => {
+                setSearchResults(data); // ✅ Direktes JSON-Ergebnis von fetch
+            })
+            .catch(error => {
+                console.error('Fehler beim Suchen:', error);
+                setSearchResults([]); // Falls Fehler → leere Ergebnisse
             })
             .finally(() => {
                 setIsLoading(false);
@@ -37,9 +42,7 @@ export default function SearchResults() {
             {!isLoading && searchResults.length === 0 && (
                 <div>
                     <p>No stories found matching your search.</p>
-                    <Link to="/">
-                        Back to Home
-                    </Link>
+                    <Link to="/">Back to Home</Link>
                 </div>
             )}
 

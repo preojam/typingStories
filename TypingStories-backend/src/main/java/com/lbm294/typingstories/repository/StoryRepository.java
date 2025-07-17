@@ -30,4 +30,14 @@ public interface StoryRepository extends JpaRepository<Story, Long> {
      * @return Liste der Story-Entitäten
      */
     List<Story> findByGenreId(Long genreId);
+
+
+    /**
+     * Sucht Stories, deren Titel (case-insensitive) den gegebenen Begriff enthalten.
+     *
+     * @param title Teil des Titels oder Suchbegriff
+     * @return Liste der passenden Stories
+     */
+    List<Story> findByTitleContainingIgnoreCase(String title);
+
 }

@@ -120,6 +120,28 @@ public class StoryController {
     }
 
     /**
+     * Sucht Stories mit Titeln, die den Suchbegriff enthalten (Case-insensitive).
+     *
+     * @param query Suchbegriff
+     * @return Liste passender Stories
+     */
+    @Operation(summary = "Stories per Suchbegriff suchen")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Gefundene Stories"),
+            @ApiResponse(responseCode = "400", description = "Suchbegriff fehlt")
+    })
+    @GetMapping("/search")
+    public ResponseEntity<List<Story>> searchStories(@RequestParam(value = "query") String query) {
+        if (query == null || query.trim().isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+        List<Story> results = storyRepo.findByTitleContainingIgnoreCase(query);
+        return ResponseEntity.ok(results);
+    }
+
+
+
+    /**
      * Legt eine neue Story an.
      *
      * @param story Story-Objekt im Request-Body (muss gültig sein und ein Genre enthalten)
