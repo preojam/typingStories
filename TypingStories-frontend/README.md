@@ -1,12 +1,91 @@
-# React + Vite
+# ✍️ TypingStories
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**TypingStories** ist eine Webapplikation, die es ermöglicht, Geschichten zu lesen, zu schreiben, zu bewerten und abzutippen. 
+Sie wurde im Rahmen der Module **M294 (Frontend)** und **M295 (Backend)** entwickelt.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Projektübersicht
 
-## Expanding the ESLint configuration
+Ziel dieser Anwendung ist es, einen interaktiven Schreib- und Lesebereich bereitzustellen. Benutzer können:
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- Geschichten nach Genres durchsuchen
+- Eigene Stories erstellen, bearbeiten und löschen (CRUD)
+- Kapitel lesen oder in Typing-Modus abtippen
+- Schreibstatistiken (WPM, Accuracy) einsehen
+- Geschichten bewerten (Plot, Characters, Style)
+
+---
+
+## 🧰 Technologien
+
+### 🔹 Frontend (React)
+- React.js (mit Vite)
+- React Router
+- HTML/CSS
+- Testing Library + Jest
+
+### 🔹 Backend (Spring Boot)
+- Java 21
+- Spring Web, Spring Data JPA
+- MySQL
+- Swagger / OpenAPI
+- JUnit / Mockito
+
+---
+
+## 🔧 Installation
+
+### Voraussetzungen
+- Node.js (≥ 16), npm
+- Java JDK 21
+- Maven
+- MySQL oder Docker
+- Git
+
+### Backend starten
+```bash
+cd TypingStories-backend
+./mvnw spring-boot:run
+Frontend starten
+bash
+Code kopieren
+cd TypingStories-frontend
+npm install
+npm run dev
+🧪 Tests
+Backend
+
+cd TypingStories-backend
+./mvnw test
+Frontend
+
+cd TypingStories-frontend
+npm test
+✔️ Alle Unit-Tests befinden sich unter src/components/__test__/ und für das Backend in src/test/java/....
+
+📷 Screenshots & Storyboard
+👉 siehe Projektdokumentation (Projektdokumentation.pdf)
+
+📂 Projektstruktur
+LB-Projekt-M294_M295_Vorname-Nachname.zip
+│
+├── Projektdokumentation.pdf
+├── Front-End/
+│   ├── src/
+│   ├── public/
+│   └── package.json
+├── Backend/
+│   ├── src/
+│   └── pom.xml
+└── Ressourcen/
+    └── setup.sql (optional)
+👥 Mitwirkende / Hilfe
+Lehrpersonen (WISS)
+
+Arvin, Thomas, Chris (Mitschüler)
+
+Online-Ressourcen: React Docs, Spring Guides, Stack Overflow, YouTube
+
+📄 Lizenz
+MIT License – siehe LICENSE
