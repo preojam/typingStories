@@ -29,7 +29,7 @@ export default function CreateStory() {
     useEffect(() => {
         fetchAllGenres()
             .then(data => setGenres(Array.isArray(data) ? data : []))
-            .catch(() => setError('Konnte Genres nicht laden.'));
+            .catch(() => setError('Genres could not be loaded. Please try again later.'));
     }, []);
 
     // 2) Reset, wenn aus Edit → Create gewechselt wird
@@ -59,7 +59,7 @@ export default function CreateStory() {
                     content: data.content    || ''
                 });
             })
-            .catch(() => setError('Konnte Story nicht laden.'))
+            .catch(() => setError('Story could not be loaded. Please try again later.'))
             .finally(() => setLoading(false));
     }, [isEdit, storyId]);
 
@@ -83,7 +83,7 @@ export default function CreateStory() {
 
         req
             .then(() => navigate('/my-stories'))
-            .catch(() => setError('Speichern fehlgeschlagen.'));
+            .catch(() => setError('Failed to save story. Please try again later.'));
     }
 
     function handleCancel() {
@@ -121,7 +121,7 @@ export default function CreateStory() {
                 {/* Rechte Spalte: Details */}
                 <div className="details-column">
                     <div className="form-group">
-                        <label>Titel</label>
+                        <label>Title</label>
                         <input
                             type="text"
                             name="title"

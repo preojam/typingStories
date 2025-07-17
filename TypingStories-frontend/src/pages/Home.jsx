@@ -25,23 +25,23 @@ export default function Home() {
     }, []);
 
     return (
-        <div className="p-6 space-y-8">
-            <div className="flex justify-between">
-                <div className="w-1/3 bg-gray-800 p-4 rounded">
-                    <h1 className="text-2xl mb-2">Welcome to TypingStories</h1>
+        <div>
+            <div>
+                <div>
+                    <h1>Welcome to TypingStories</h1>
                     <p>Words connect worlds…</p>
                 </div>
 
                 {lastStory && (
-                    <div className="w-1/3">
-                        <h2 className="mb-2">Last Read</h2>
+                    <div>
+                        <h2>Last Read</h2>
                         <StoryCard story={lastStory} />
                     </div>
                 )}
             </div>
 
-            <h2 className="text-xl">All Stories</h2>
-            <div className="grid grid-cols-3 gap-4">
+            <h2>All Stories</h2>
+            <div>
                 {stories.map(s => (
                     <StoryCard key={s.id} story={s} />
                 ))}

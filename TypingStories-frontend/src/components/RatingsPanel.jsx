@@ -55,20 +55,20 @@ export default function RatingsPanel({ storyId }) {
                 / 10 ({scores.length})
             </p>
 
-            <hr className="my-3 border-gray-600" />
+            <hr/>
 
-            <form onSubmit={handleSubmit} className="space-y-3">
+            <form onSubmit={handleSubmit}>
                 {[
                     ['Plot', plot, setPlot],
                     ['Characters', characters, setCharacters],
                     ['Style', styleRating, setStyleRating]
                 ].map(([label, val, setter]) => (
                     <div key={label}>
-                        <label className="block">{label}</label>
+                        <label>{label}</label>
                         <select
                             value={val}
                             onChange={e => setter(Number(e.target.value))}
-                            className="form-input mt-1"
+
                         >
                             <option value={0}>—</option>
                             {[...Array(10)].map((_, i) => (
@@ -80,21 +80,20 @@ export default function RatingsPanel({ storyId }) {
 
                 <p>
                     Your Average Rating:{' '}
-                    <strong className="text-lg">{avg}</strong> / 10
+                    <strong>{avg}</strong> / 10
                 </p>
 
-                {error && <p className="text-red-500 text-sm">{error}</p>}
+                {error && <p>{error}</p>}
 
                 <button
                     type="submit"
-                    className="px-4 py-2 bg-blue-600 text-white rounded"
                 >
                     Enter
                 </button>
             </form>
 
             {/* Liste aller bisherigen Ratings */}
-            <ul className="mt-4 list-disc list-inside text-sm">
+            <ul>
                 {scores.map(s => (
                     <li key={s.id}>
                         {s.createdAt?.substring(0,10) || ''} {s.value.toFixed(1)} ({s.component})

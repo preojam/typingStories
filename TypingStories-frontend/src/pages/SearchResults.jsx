@@ -29,22 +29,22 @@ export default function SearchResults() {
     }, [searchQuery]);
 
     return (
-        <div className="p-6">
-            <h2 className="text-2xl mb-4">Search Results for “{searchQuery}”</h2>
+        <div>
+            <h2>Search Results for “{searchQuery}”</h2>
 
             {isLoading && <p>Loading…</p>}
 
             {!isLoading && searchResults.length === 0 && (
                 <div>
                     <p>No stories found matching your search.</p>
-                    <Link to="/" className="text-blue-400 hover:underline">
+                    <Link to="/">
                         Back to Home
                     </Link>
                 </div>
             )}
 
             {!isLoading && searchResults.length > 0 && (
-                <div className="grid grid-cols-3 gap-4">
+                <div>
                     {searchResults.map(story => (
                         <StoryCard key={story.id} story={story} />
                     ))}

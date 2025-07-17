@@ -32,13 +32,13 @@ export default function Discover() {
     }, [genreIdParam]);
 
     return (
-        <div className="p-6 space-y-6">
-            <h1 className="text-2xl font-semibold">Discover</h1>
+        <div>
+            <h1 >Discover</h1>
 
-            {error && <p className="text-red-500">{error}</p>}
+            {error && <p>{error}</p>}
 
             {/* Genre-Pillen */}
-            <div className="flex flex-wrap">
+            <div>
                 {genres.map(g => (
                     <GenreBadge key={g.id} genre={g} />
                 ))}
@@ -47,16 +47,16 @@ export default function Discover() {
             {/* Stories zum gewählten Genre */}
             {genreIdParam ? (
                 stories.length > 0 ? (
-                    <div className="grid grid-cols-3 gap-4">
+                    <div>
                         {stories.map(s => (
                             <StoryCard key={s.id} story={s} />
                         ))}
                     </div>
                 ) : (
-                    <p className="text-gray-500">No stories in this genre yet.</p>
+                    <p>No stories in this genre yet.</p>
                 )
             ) : (
-                <p className="text-gray-600">Please choose a genre.</p>
+                <p>Please choose a genre.</p>
             )}
         </div>
     );
