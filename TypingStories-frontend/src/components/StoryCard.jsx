@@ -4,15 +4,13 @@ import { Link } from 'react-router-dom';
 
 import CoverNotAvailable from '../assets/CoverNotAvailable.jpg';
 
-export default function StoryCard({ story }) {
+export default function StoryCard({ story, showActions = false, onEdit, onDelete }) {
     if (!story) return null;
 
-    // Cover-URL oder Fallback
     const coverSrc = story.coverUrl
         ? `http://localhost:8080${story.coverUrl}`
         : CoverNotAvailable;
 
-    // Snippet max. 100 Zeichen
     const maxLen = 100;
     const text   = story.content || '';
     const snippet =
@@ -42,17 +40,21 @@ export default function StoryCard({ story }) {
                     <p className="story-card__snippet">
                         {snippet}
                         {text.length > maxLen && (
-                            <>
-                                {' '}
-                                <Link
-                                    to={`/typing/${story.id}`}
-                                    className="story-card__more"
-                                >
-                                    continue
-                                </Link>
-                            </>
+                            <Link
+                                to={`/typing/${story.id}`}
+                                className="story-card__more"
+                            >
+                                continue
+                            </Link>
                         )}
                     </p>
+                )}
+
+                {showActions && (
+                    <div className="story-actions">
+                        <button onClick={() => onEdit(story.id)} className="edit-btn">Edit</button>
+                        <button onClick={() => onDelete(story.id)} className="delete-btn">Delete</button>
+                    </div>
                 )}
             </div>
         </div>
@@ -69,4 +71,7 @@ StoryCard.propTypes = {
         }),
         coverUrl: PropTypes.string,
     }),
+    showActions: PropTypes.bool,
+    onEdit: PropTypes.func,
+    onDelete: PropTypes.func,
 };
