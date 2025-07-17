@@ -68,7 +68,7 @@ npm test
 👉 siehe Projektdokumentation (Projektdokumentation.pdf)
 
 📂 Projektstruktur
-LB-Projekt-M294_M295_Vorname-Nachname.zip
+LB-typingstories
 │
 ├── Projektdokumentation.pdf
 ├── Front-End/
